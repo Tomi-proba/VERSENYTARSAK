@@ -120,6 +120,8 @@
   .market-row{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;align-items:end;padding:8px 0;border-bottom:1px solid var(--border);}
   .market-row:last-child{border-bottom:none;}
   .market-row .mname{font-weight:700;font-size:13px;padding-bottom:6px;grid-column:1/-1;}
+  .market-row .forecast-hint{margin-top:2px;line-height:1.4;}
+  .market-row .forecast-hint:empty{display:none;}
   #worldmap-wrap{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;}
   @media (max-width:800px){#worldmap-wrap{grid-template-columns:1fr;}}
   #worldmap{width:100%;height:auto;border:1px solid var(--border);border-radius:8px;background:var(--surface-sunken);}
@@ -368,10 +370,14 @@ const CONFIG = {
   gameLengthOptions: [24, 48],
   startingCash: 2000000,
 
+  // Raktár: mind a bérlés, mind a vásárlás TÖBBSZÖR megismételhető (raktáregységenként), és minden
+  // további egység egyre drágább (kevesebb az olcsó, jól elérhető ipari ingatlan). A vásárlás a
+  // valóságnak megfelelően SOKKAL drágább, mint a bérlés — cserébe nincs havi bérleti díj, csak
+  // (kisebb) fenntartási költség, és hosszú távon (kb. 4-6 év alatt) megtérülhet.
   warehouse: {
     homeCapacityMin: 300, homeCapacityMax: 500,
-    externalRent: 90000, externalCapacityBonus: 1500,
-    ownedPurchaseCost: 3500000, ownedCapacityBonus: 3000, ownedMaintenance: 40000,
+    rented: { capacityPerUnit: 1200, baseRent: 220000, rentGrowth: 1.35 },
+    owned: { capacityPerUnit: 2500, basePurchase: 14000000, baseMaintenance: 130000, purchaseGrowth: 1.5, maintenanceGrowth: 1.3 },
   },
 
   legal: {
@@ -596,8 +602,8 @@ function initState(bizForm, jobStatus, gameLength){
     inventory: 0,
     avgUnitCost: 0,
     warehouseHomeCapacity: homeCapacity,
-    warehouseExternal: false,
-    warehouseOwned: false,
+    rentedWarehouses: [], // { monthlyRent } — minden bérelt egység a bérléskori áron marad rögzítve
+    ownedWarehouses: [], // { maintenance } — minden megvásárolt egység a vásárláskori fenntartási díjjal
     hasInsurance: false,
     position: 40,
     prevPosition: 40,
@@ -627,9 +633,14 @@ function initState(bizForm, jobStatus, gameLength){
 function activeMarketKeys(){ return Object.keys(state.markets).filter(k=>state.markets[k].active); }
 function warehouseCapacity(){
   return state.warehouseHomeCapacity
-    + (state.warehouseExternal ? CONFIG.warehouse.externalCapacityBonus : 0)
-    + (state.warehouseOwned ? CONFIG.warehouse.ownedCapacityBonus : 0);
+    + state.rentedWarehouses.length * CONFIG.warehouse.rented.capacityPerUnit
+    + state.ownedWarehouses.length * CONFIG.warehouse.owned.capacityPerUnit;
 }
+function totalWarehouseRent(){ return state.rentedWarehouses.reduce((a,w)=>a+w.monthlyRent, 0); }
+function totalWarehouseMaintenance(){ return state.ownedWarehouses.reduce((a,w)=>a+w.maintenance, 0); }
+function nextRentCost(){ return Math.round(CONFIG.warehouse.rented.baseRent * Math.pow(CONFIG.warehouse.rented.rentGrowth, state.rentedWarehouses.length)); }
+function nextOwnedPurchaseCost(){ return Math.round(CONFIG.warehouse.owned.basePurchase * Math.pow(CONFIG.warehouse.owned.purchaseGrowth, state.ownedWarehouses.length)); }
+function nextOwnedMaintenanceCost(){ return Math.round(CONFIG.warehouse.owned.baseMaintenance * Math.pow(CONFIG.warehouse.owned.maintenanceGrowth, state.ownedWarehouses.length)); }
 function incomingUnits(){ return state.shipments.filter(s=>!s.arrived).reduce((a,s)=>a+s.qty,0); }
 function employeesByRole(role){ return state.employees.filter(e=>e.role===role); }
 function warehouseStaffCapacity(){
@@ -687,14 +698,17 @@ function backgroundNoisePenalty(position){
 
 const MARKET_GRID_STEP = 2;
 
-function computeHuAllocations(month, decision){
+function computeHuAllocations(month, decision, opts){
+  opts = opts || {};
   const seasonal = seasonalMultiplier(month);
   const mEff = marketingEffMultiplier();
   const qEff = qualityPerceptionMultiplier();
+  const playerPrice = opts.priceOverride ?? state.markets.hu.price;
+  const playerMarketing = opts.marketingOverride ?? state.markets.hu.marketing;
 
   const participants = [
-    { key:"player", isPlayer:true, position: decision.position, price: state.markets.hu.price,
-      awareness: state.markets.hu.awareness, marketingSpend: state.markets.hu.marketing * mEff },
+    { key:"player", isPlayer:true, position: decision.position, price: playerPrice,
+      awareness: state.markets.hu.awareness, marketingSpend: playerMarketing * mEff },
     ...state.competitors.map(c=>({ key:c.key, isPlayer:false, position:c.position, price:c.price, awareness:c.awareness, marketingSpend:c.marketingSpend, volumeCap:c.volumeCap })),
   ];
 
@@ -712,7 +726,7 @@ function computeHuAllocations(month, decision){
   for(let x=0; x<=100; x+=MARKET_GRID_STEP){ const d = marketDensity(x); grid.push({x,d}); densitySum += d; }
   const densityAvg = densitySum/grid.length;
 
-  const totalPool = CONFIG.market.huTotalMonthlyPotentialCustomers * seasonal * randRange(0.94,1.06);
+  const totalPool = CONFIG.market.huTotalMonthlyPotentialCustomers * seasonal * (opts.deterministic ? 1 : randRange(0.94,1.06));
   const units = {}; participants.forEach(p=>units[p.key]=0);
 
   for(const gp of grid){
@@ -746,21 +760,39 @@ function computeHuAllocations(month, decision){
   return results;
 }
 
-function computeExportDemand(marketKey, decision){
+function computeExportDemand(marketKey, decision, opts){
+  opts = opts || {};
   const cfg = CONFIG.markets[marketKey];
   const mstate = state.markets[marketKey];
+  const price = opts.priceOverride ?? mstate.price;
+  const marketing = opts.marketingOverride ?? mstate.marketing;
   const seasonal = seasonalMultiplier(state.month);
   const mEff = marketingEffMultiplier();
   const qEff = qualityPerceptionMultiplier();
   const idealPrice = idealPriceForPosition(decision.position) * cfg.idealPriceFactor;
-  const pf = priceFactorGeneric(mstate.price, idealPrice);
+  const pf = priceFactorGeneric(price, idealPrice);
   const ref = CONFIG.market.marketingRefSpend * cfg.marketingCostMultiplier;
-  const mb = marketingEffect(mstate.marketing*mEff, ref) * CONFIG.market.marketingMaxBoost;
+  const mb = marketingEffect(marketing*mEff, ref) * CONFIG.market.marketingMaxBoost;
   const baseline = CONFIG.market.huTotalMonthlyPotentialCustomers * cfg.sizeFactor;
   const attractiveness = Math.max(0.01, mstate.awareness/100) * pf * (1+mb) * qEff;
   const distCfg = CONFIG.distribution[decision.distribution];
-  let units = baseline * seasonal * attractiveness * CONFIG.market.exportGenericCompetitionDamp * distCfg.reachMultiplier * randRange(0.9,1.1);
+  let units = baseline * seasonal * attractiveness * CONFIG.market.exportGenericCompetitionDamp * distCfg.reachMultiplier * (opts.deterministic ? 1 : randRange(0.9,1.1));
   return Math.max(0, units);
+}
+
+// Marketing szakember becslése: "ha ennyit költesz marketingre ezen a piacon, kb. ennyi bevételre
+// számíthatsz" — ugyanazt a keresleti modellt használja, mint az éles szimuláció, csak véletlen
+// ingadozás (zaj) nélkül, és nem módosítja a játékállapotot.
+function estimateMarketRevenue(marketKey, price, marketing){
+  const decisionLike = { position: Number(inPosition.value), distribution: inDistribution.value };
+  let units;
+  if(marketKey === "hu"){
+    units = computeHuAllocations(state.month, decisionLike, { priceOverride: price, marketingOverride: marketing, deterministic: true }).player.units;
+  } else {
+    units = computeExportDemand(marketKey, decisionLike, { priceOverride: price, marketingOverride: marketing, deterministic: true });
+  }
+  units = Math.round(units);
+  return { units, revenue: units*price };
 }
 
 // ============================= GYÁRTÓI RENDELÉS / SZÁLLÍTMÁNYOK =============================
@@ -898,8 +930,7 @@ function runMonth(decision){
     fixed: state.fixed.accountant + state.employees.length*CONFIG.fixedCosts.accountant.perEmployeeExtra
       + state.fixed.invoicing + state.fixed.webshop + state.fixed.bankFee
       + (state.hasInsurance? CONFIG.fixedCosts.insurance.monthly : 0)
-      + (state.warehouseExternal? CONFIG.warehouse.externalRent : 0)
-      + (state.warehouseOwned? CONFIG.warehouse.ownedMaintenance : 0),
+      + totalWarehouseRent() + totalWarehouseMaintenance(),
     teamCost: totalTeamCost(),
     marketMaintenance: activeMarketKeys().filter(k=>k!=="hu").reduce((a,k)=>a+CONFIG.markets[k].maintenanceExtra,0),
     mandatoryContribution: 0,
@@ -1201,7 +1232,9 @@ function prefillDecisionPanel(){
   renderSupplierHint();
   renderTeamPanel();
 }
-inPosition.addEventListener("input", ()=>{ positionValue.textContent = inPosition.value; renderPositionMap(); });
+function updateAllForecastHints(){ for(const key of activeMarketKeys()) updateForecastHint(key); }
+inPosition.addEventListener("input", ()=>{ positionValue.textContent = inPosition.value; renderPositionMap(); updateAllForecastHints(); });
+inDistribution.addEventListener("change", updateAllForecastHints);
 inOrder.addEventListener("input", renderOrderHint);
 inSupplier.addEventListener("change", renderSupplierHint);
 
@@ -1221,6 +1254,20 @@ function renderSupplierHint(){
   document.getElementById("supplier-hint").textContent = hint;
 }
 
+function hasMarketingSpecialist(){ return employeesByRole("marketing").length > 0; }
+
+function updateForecastHint(key){
+  const hint = marketDecisionRows.querySelector(`.forecast-hint[data-market="${key}"]`);
+  if(!hint) return;
+  if(!hasMarketingSpecialist()){ hint.textContent = ""; return; }
+  const priceInp = marketDecisionRows.querySelector(`.mkt-price[data-market="${key}"]`);
+  const marketingInp = marketDecisionRows.querySelector(`.mkt-marketing[data-market="${key}"]`);
+  const price = Number(priceInp.value)||0;
+  const marketing = Number(marketingInp.value)||0;
+  const { units, revenue } = estimateMarketRevenue(key, price, marketing);
+  hint.textContent = `📈 Marketing szakember becslése: kb. ${units} db eladás, kb. ${ft(revenue)} havi bevétel ennyi marketinggel (a tényleges eredmény a szezontól és a véletlen eseményektől függően ingadozhat).`;
+}
+
 function renderMarketDecisionRows(){
   marketDecisionRows.innerHTML = "";
   for(const key of activeMarketKeys()){
@@ -1232,8 +1279,12 @@ function renderMarketDecisionRows(){
       <div class="mname">${cfg.name}</div>
       <div><label>Ár (Ft/db)</label><input type="number" step="500" min="1000" class="mkt-price" data-market="${key}" value="${mstate.price ?? 24990}"></div>
       <div><label>Marketing (Ft/hó)</label><input type="number" step="5000" min="0" class="mkt-marketing" data-market="${key}" value="${mstate.marketing ?? 0}"></div>
+      <div class="small muted forecast-hint" data-market="${key}" style="grid-column:1/-1;"></div>
     `;
     marketDecisionRows.appendChild(row);
+    row.querySelector(".mkt-price").addEventListener("input", ()=>updateForecastHint(key));
+    row.querySelector(".mkt-marketing").addEventListener("input", ()=>updateForecastHint(key));
+    updateForecastHint(key);
   }
 }
 
@@ -1241,15 +1292,14 @@ function renderExpansionControls(){
   expansionControls.innerHTML = "";
   const add = (html)=>{ const d=document.createElement("div"); d.className="col"; d.innerHTML=html; expansionControls.appendChild(d); return d; };
 
-  if(!state.warehouseOwned){
-    if(!state.warehouseExternal){
-      const canAfford = state.cash > CONFIG.warehouse.externalRent*2;
-      add(`<button class="btn secondary" id="btn-buy-warehouse" ${canAfford?"":"disabled"}>Külső raktár bérlése (+${CONFIG.warehouse.externalCapacityBonus} db, ${ft(CONFIG.warehouse.externalRent)}/hó)</button>`);
-    }
-    const canAffordOwn = state.cash > CONFIG.warehouse.ownedPurchaseCost*1.2;
-    add(`<button class="btn secondary" id="btn-own-warehouse" ${canAffordOwn?"":"disabled"}>Saját raktár vásárlása (+${CONFIG.warehouse.ownedCapacityBonus} db, egyszeri ${ft(CONFIG.warehouse.ownedPurchaseCost)}, ${ft(CONFIG.warehouse.ownedMaintenance)}/hó fenntartás)</button>`);
-  } else {
-    add(`<div class="small muted">✓ Saját raktár (+${CONFIG.warehouse.ownedCapacityBonus} db kapacitás)</div>`);
+  {
+    const rentCost = nextRentCost();
+    const canRent = state.cash > rentCost*2;
+    add(`<button class="btn secondary" id="btn-buy-warehouse" ${canRent?"":"disabled"}>Külső raktár bérlése (+${CONFIG.warehouse.rented.capacityPerUnit} db, ${ft(rentCost)}/hó)${state.rentedWarehouses.length>0?` <span class="muted small">— jelenleg ${state.rentedWarehouses.length} bérelt egység, összesen ${ft(totalWarehouseRent())}/hó</span>`:""}</button>`);
+    const purchaseCost = nextOwnedPurchaseCost();
+    const maintenanceCost = nextOwnedMaintenanceCost();
+    const canOwn = state.cash > purchaseCost*1.2;
+    add(`<button class="btn secondary" id="btn-own-warehouse" ${canOwn?"":"disabled"}>Saját raktár vásárlása (+${CONFIG.warehouse.owned.capacityPerUnit} db, egyszeri ${ft(purchaseCost)}, ${ft(maintenanceCost)}/hó fenntartás)${state.ownedWarehouses.length>0?` <span class="muted small">— jelenleg ${state.ownedWarehouses.length} saját raktár, összesen ${ft(totalWarehouseMaintenance())}/hó fenntartás</span>`:""}</button>`);
   }
 
   if(!state.hasInsurance){
@@ -1287,8 +1337,18 @@ function renderExpansionControls(){
   }
 
   const bind = (id, fn)=>{ const el=document.getElementById(id); if(el) el.addEventListener("click", fn); };
-  bind("btn-buy-warehouse", ()=>{ state.warehouseExternal=true; renderExpansionControls(); renderOrderHint(); renderAll(); });
-  bind("btn-own-warehouse", ()=>{ state.cash -= CONFIG.warehouse.ownedPurchaseCost; state.warehouseOwned=true; state.warehouseExternal=false; state.pendingExpansionCost += CONFIG.warehouse.ownedPurchaseCost; renderExpansionControls(); renderOrderHint(); renderAll(); });
+  bind("btn-buy-warehouse", ()=>{
+    state.rentedWarehouses.push({ monthlyRent: nextRentCost() });
+    renderExpansionControls(); renderOrderHint(); renderAll();
+  });
+  bind("btn-own-warehouse", ()=>{
+    const cost = nextOwnedPurchaseCost();
+    const maintenance = nextOwnedMaintenanceCost();
+    state.cash -= cost;
+    state.pendingExpansionCost += cost;
+    state.ownedWarehouses.push({ maintenance });
+    renderExpansionControls(); renderOrderHint(); renderAll();
+  });
   bind("btn-insurance", ()=>{ state.hasInsurance=true; renderExpansionControls(); renderAll(); });
   bind("btn-website-basic", ()=>{ state.cash -= CONFIG.oneTime.website.basic.cost; state.website.tier="basic"; renderExpansionControls(); renderAll(); });
   bind("btn-website-custom", ()=>{ state.cash -= CONFIG.oneTime.website.custom.cost; state.website.tier="custom"; renderExpansionControls(); renderAll(); });
@@ -1418,7 +1478,7 @@ function renderTeamPanel(){
     <p class="small muted" style="margin-top:6px;">Csapatlétszám: ${state.employees.length} fő · Havi teljes bérköltség: ${ft(totalTeamCost())}</p>`;
   wrap.innerHTML = html;
   wrap.querySelectorAll("[data-fire]").forEach(btn=>{
-    btn.addEventListener("click", ()=>{ fireEmployee(Number(btn.dataset.fire)); renderTeamPanel(); renderAll(); });
+    btn.addEventListener("click", ()=>{ fireEmployee(Number(btn.dataset.fire)); renderTeamPanel(); updateAllForecastHints(); renderAll(); });
   });
   document.getElementById("btn-open-hire").addEventListener("click", openHireModal);
 }
@@ -1465,6 +1525,7 @@ function openHireModal(){
     hireEmployee(role, fullTime, market);
     document.getElementById("hire-modal").hidden = true;
     renderTeamPanel();
+    updateAllForecastHints();
     renderAll();
   });
   document.getElementById("hire-modal").hidden = false;
