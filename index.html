@@ -11,6 +11,7 @@
     --text:#1c1d1a; --muted:#6c6d64; --accent:#1c1d1a; --accent-fg:#ffffff; --accent-soft:#ecece6;
     --track:#e5e5df; --player:#2f5fd6;
     --good:#1f7a3d; --bad:#b3261e; --warn:#8a6100; --warn-bg:#fdf3d8; --warn-border:#e3cd8c;
+    --locked:#a3a39a;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
@@ -18,6 +19,7 @@
       --text:#eceae4; --muted:#9a9c93; --accent:#eceae4; --accent-fg:#15161a; --accent-soft:#252722;
       --track:#2a2c26; --player:#7ea2ff;
       --good:#4ade80; --bad:#ff7a6e; --warn:#e8c15c; --warn-bg:#332c14; --warn-border:#5a4a20;
+      --locked:#5a5c54;
     }
   }
   :root[data-theme="dark"]{
@@ -25,6 +27,7 @@
     --text:#eceae4; --muted:#9a9c93; --accent:#eceae4; --accent-fg:#15161a; --accent-soft:#252722;
     --track:#2a2c26; --player:#7ea2ff;
     --good:#4ade80; --bad:#ff7a6e; --warn:#e8c15c; --warn-bg:#332c14; --warn-border:#5a4a20;
+    --locked:#5a5c54;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);color:var(--text);font-family:"Manrope",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.45;}
@@ -32,7 +35,7 @@
   h1,h2{text-wrap:balance;}
   .disclaimer-bar{background:var(--warn-bg);border-bottom:1px solid var(--warn-border);color:var(--warn);
     padding:8px 16px;font-size:12.5px;text-align:center;}
-  .wrap{max-width:1180px;margin:0 auto;padding:16px;}
+  .wrap{max-width:1240px;margin:0 auto;padding:16px;}
   h1,h2,h3{margin:0 0 8px 0;}
   h1{font-size:20px;} h2{font-size:15px;} h3{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;}
   .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;}
@@ -45,6 +48,7 @@
     width:100%;padding:7px 9px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font-size:13.5px;font-family:inherit;
   }
   input[type=range]{width:100%;}
+  input[type=checkbox]{width:auto;}
   fieldset{border:1px solid var(--border);border-radius:8px;padding:12px;margin:0 0 12px 0;}
   legend{padding:0 6px;font-size:12.5px;color:var(--muted);}
   .field{margin-bottom:12px;}
@@ -53,13 +57,17 @@
   .btn:hover{opacity:.88;}
   .btn:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible{outline:2px solid var(--player);outline-offset:2px;}
   .btn.secondary{background:var(--panel);color:var(--text);border:1px solid var(--border-strong);}
-  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn.tiny{padding:4px 9px;font-size:12px;border-radius:5px;}
+  .btn.danger{border-color:var(--bad);color:var(--bad);background:transparent;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
   .btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
   .radio-opt{display:flex;align-items:flex-start;gap:8px;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;cursor:pointer;}
-  .radio-opt input{margin-top:3px;}
+  .radio-opt input{margin-top:3px;width:auto;}
   .radio-opt .t{font-weight:600;}
+  .radio-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .radio-row .radio-opt{flex:1 1 160px;}
   .warn-box{background:var(--warn-bg);border:1px solid var(--warn-border);color:var(--warn);border-radius:8px;padding:10px 12px;font-size:12.5px;margin:10px 0;}
-  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;}
   .stat{background:var(--accent-soft);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
   .stat .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;}
   .stat .v{font-size:16px;font-weight:700;margin-top:2px;}
@@ -75,7 +83,7 @@
   .pm-label{font-size:10px;margin-top:3px;white-space:nowrap;color:var(--muted);}
   .pm-marker.player .pm-label{color:var(--player);font-weight:700;}
   .zone-label{position:absolute;top:58px;font-size:9.5px;color:var(--muted);}
-  .layout{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;}
+  .layout{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;}
   @media (max-width:900px){.layout{grid-template-columns:1fr;}}
   .feedback-scroll{max-height:420px;overflow-y:auto;padding-right:4px;}
   .feedback-month{border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden;}
@@ -96,8 +104,8 @@
   table.costs th, table.costs td{border-bottom:1px solid var(--border);padding:6px 4px;text-align:left;}
   table.costs td.num, table.costs th.num{text-align:right;font-variant-numeric:tabular-nums;}
   table.costs tr.total td{font-weight:700;border-top:2px solid var(--border-strong);}
-  .modal-overlay{position:fixed;inset:0;background:rgba(10,10,10,.5);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:50;}
-  .modal-box{background:var(--panel);color:var(--text);border-radius:10px;max-width:640px;width:100%;padding:20px;max-height:85vh;overflow:auto;border:1px solid var(--border);}
+  .modal-overlay{position:fixed;inset:0;background:rgba(10,10,10,.5);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:50;overflow-y:auto;}
+  .modal-box{background:var(--panel);color:var(--text);border-radius:10px;max-width:700px;width:100%;padding:20px;max-height:85vh;overflow:auto;border:1px solid var(--border);}
   .modal-box .close-row{display:flex;justify-content:flex-end;margin-bottom:6px;}
   [hidden]{display:none!important;}
   .badge{display:inline-block;padding:2px 8px;border-radius:20px;background:var(--accent-soft);border:1px solid var(--border);font-size:11px;color:var(--muted);}
@@ -106,12 +114,37 @@
   .rank-table td.num{text-align:right;font-variant-numeric:tabular-nums;}
   .rank-table tr.me{background:var(--accent-soft);font-weight:700;}
   footer.hint{font-size:11.5px;color:var(--muted);margin-top:4px;}
+  table.team{width:100%;border-collapse:collapse;font-size:13px;}
+  table.team th, table.team td{border-bottom:1px solid var(--border);padding:6px 4px;text-align:left;}
+  table.team td.num{text-align:right;font-variant-numeric:tabular-nums;}
+  .market-row{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;align-items:end;padding:8px 0;border-bottom:1px solid var(--border);}
+  .market-row:last-child{border-bottom:none;}
+  .market-row .mname{font-weight:700;font-size:13px;padding-bottom:6px;grid-column:1/-1;}
+  #worldmap-wrap{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;}
+  @media (max-width:800px){#worldmap-wrap{grid-template-columns:1fr;}}
+  #worldmap{width:100%;height:auto;border:1px solid var(--border);border-radius:8px;background:var(--surface-sunken);}
+  .region{cursor:pointer;}
+  .region rect{fill:var(--accent-soft);stroke:var(--border-strong);stroke-width:1.5;transition:fill .15s;}
+  .region:hover rect{fill:var(--track);}
+  .region.active rect{fill:var(--player);opacity:.85;}
+  .region.locked rect{fill:var(--locked);opacity:.5;}
+  .region text{fill:var(--text);font-size:12px;font-weight:700;pointer-events:none;}
+  .region.active text{fill:var(--accent-fg);}
+  .region .sub{font-size:9.5px;font-weight:500;fill:var(--muted);}
+  .region.active .sub{fill:var(--accent-fg);opacity:.85;}
+  #market-info{border:1px solid var(--border);border-radius:8px;padding:12px;background:var(--surface-sunken);min-height:220px;}
+  #market-info dl{margin:8px 0;font-size:12.5px;}
+  #market-info dt{color:var(--muted);margin-top:6px;}
+  #market-info dd{margin:0;font-weight:600;}
+  .procon{font-size:12px;margin-top:8px;}
+  .procon .pro{color:var(--good);} .procon .con{color:var(--bad);}
+  .lock-note{font-size:11.5px;color:var(--warn);margin-top:6px;}
 </style>
 </head>
 <body>
 
 <div class="disclaimer-bar">
-  Ez egy leegyszerűsített, oktatási célú szimuláció. A valós adó- és járulékszabályok ennél részletesebbek és változhatnak — valódi vállalkozás indítása előtt konzultálj könyvelővel vagy adótanácsadóval.
+  Ez egy leegyszerűsített, oktatási célú szimuláció. A valós adó-, járulék- és iparjogvédelmi szabályok ennél részletesebbek és változhatnak — valódi vállalkozás indítása előtt konzultálj könyvelővel, adótanácsadóval és szabadalmi ügyvivővel.
 </div>
 
 <div class="wrap">
@@ -120,14 +153,28 @@
   <div id="setup-screen" class="screen">
     <div class="card">
       <h1>Napszemüveg Inc. — indítsd el a márkádat</h1>
-      <p class="muted small">24 hónapos üzleti szimuláció. Induló tőke: <strong>2 000 000 Ft</strong>. Otthonról dolgozol, nincs telephely, nincs bérleti díj — a bővülés később elérhető.</p>
+      <p class="muted small">Induló tőke: <strong>2 000 000 Ft</strong>. Otthonról dolgozol, nincs telephely, nincs bérleti díj — a csapatépítés és a nemzetközi terjeszkedés később elérhető.</p>
+
+      <fieldset>
+        <legend>Játékhossz</legend>
+        <div class="radio-row">
+          <label class="radio-opt">
+            <input type="radio" name="gamelength" value="24" checked>
+            <span><span class="t">24 hónap</span><br><span class="small muted">Rövidebb, gyorsabb kihívás.</span></span>
+          </label>
+          <label class="radio-opt">
+            <input type="radio" name="gamelength" value="48">
+            <span><span class="t">48 hónap</span><br><span class="small muted">Hosszabb játék — reális esély a nemzetközi terjeszkedésre.</span></span>
+          </label>
+        </div>
+      </fieldset>
 
       <fieldset>
         <legend>Vállalkozási forma</legend>
         <label class="radio-opt">
           <input type="radio" name="bizform" value="ev" checked>
           <span><span class="t">Egyéni vállalkozó, átalányadózással</span><br>
-          <span class="small muted">Nincs törzstőke-igény, egyszerűbb adminisztráció. Éves 1 936 800 Ft bevételig adómentes, e fölött 40% jövedelemhányaddal, 15% SZJA.</span></span>
+          <span class="small muted">Nincs törzstőke-igény. Éves 1 936 800 Ft bevételig adómentes, e fölött 40% jövedelemhányaddal, 15% SZJA. A játék során bármikor átválthatsz Kft-re.</span></span>
         </label>
         <label class="radio-opt">
           <input type="radio" name="bizform" value="kft">
@@ -142,12 +189,12 @@
         <label class="radio-opt">
           <input type="radio" name="jobstatus" value="fulltime" checked>
           <span><span class="t">Főállású vállalkozó</span><br>
-          <span class="small muted">Kötelező havonta legalább a minimálbér (EV) / garantált bérminimum (Kft.) után megfizetni a TB-járulékot (18,5%) és a szochót (13%) — ez fix teher, a tényleges kivéttől függetlenül.</span></span>
+          <span class="small muted">Kötelező havonta legalább a minimálbér (EV) / garantált bérminimum (Kft.) után megfizetni a TB-járulékot (18,5%) és a szochót (13%) — fix teher, a tényleges kivéttől függetlenül.</span></span>
         </label>
         <label class="radio-opt">
           <input type="radio" name="jobstatus" value="parttime">
           <span><span class="t">Mellékállású vállalkozó</span><br>
-          <span class="small muted">Van másik munkahelyed (onnan biztosított vagy) — nincs kötelező minimum járulék, csak a ténylegesen kivett jövedelem után adózol.</span></span>
+          <span class="small muted">Van másik, biztosított munkahelyed — nincs kötelező minimum járulék.</span></span>
         </label>
       </fieldset>
 
@@ -165,36 +212,47 @@
     </div>
 
     <div class="card">
-      <h2>Pozicionálási térkép <span class="badge">0 = tömegpiaci · 100 = luxus</span></h2>
+      <h2>Pozicionálási térkép (hazai piac) <span class="badge">0 = tömegpiaci · 100 = luxus</span></h2>
       <div id="posmap"></div>
-      <footer class="hint">Minél közelebb pozicionálod magad egy versenytárshoz, annál nagyobb az átfedés a vevőkörben — erősebb a verseny, lassabb a márkaismertség-növekedés.</footer>
+      <footer class="hint">Minél közelebb pozicionálod magad egy versenytárshoz, annál nagyobb az átfedés a vevőkörben — erősebb a verseny, lassabb a márkaismertség-növekedés. A "piaci háttérzaj" (sok kis névtelen DTC márka) főleg az elérhető prémium zónában (kb. 35 pont körül) nehezíti a dolgod.</footer>
+    </div>
+
+    <div class="card">
+      <h2>Nemzetközi terjeszkedés</h2>
+      <div id="worldmap-wrap">
+        <svg id="worldmap" viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div id="market-info"><p class="muted small">Kattints egy régióra a térképen a részletekért.</p></div>
+      </div>
     </div>
 
     <div class="layout">
       <div class="card">
         <h2>Havi döntések — <span id="month-label"></span></h2>
+
+        <fieldset>
+          <legend>Piaconkénti ár és marketing</legend>
+          <div id="market-decision-rows"></div>
+        </fieldset>
+
         <div class="row">
           <div class="col">
-            <div class="field">
-              <label for="in-price">Eladási ár (Ft/db, bruttó)</label>
-              <input type="number" id="in-price" step="500" min="1000">
-            </div>
             <div class="field">
               <label for="in-quality">Gyártási minőség / költség szint</label>
               <select id="in-quality"></select>
             </div>
             <div class="field">
-              <label for="in-packaging">Csomagolási minőség</label>
-              <select id="in-packaging"></select>
+              <label for="in-supplier">Gyártó</label>
+              <select id="in-supplier"></select>
+              <div class="small muted" id="supplier-hint"></div>
             </div>
             <div class="field">
-              <label for="in-marketing">Havi marketing büdzsé (Ft)</label>
-              <input type="number" id="in-marketing" step="5000" min="0">
+              <label for="in-packaging">Csomagolási minőség</label>
+              <select id="in-packaging"></select>
             </div>
           </div>
           <div class="col">
             <div class="field">
-              <label for="in-position">Pozicionálás: <span id="position-value"></span></label>
+              <label for="in-position">Globális pozicionálás: <span id="position-value"></span></label>
               <input type="range" id="in-position" min="0" max="100" step="1">
             </div>
             <div class="field">
@@ -206,15 +264,18 @@
               </select>
             </div>
             <div class="field">
-              <label for="in-order">Rendelt darabszám a gyártótól (Kína)</label>
+              <label for="in-order">Rendelt darabszám a gyártótól</label>
               <input type="number" id="in-order" step="10" min="0">
               <div class="small muted" id="order-hint"></div>
+            </div>
+            <div class="field">
+              <label><input type="checkbox" id="in-qa"> Független minőségbiztosítási ellenőrzés erre a rendelésre (<span id="qa-cost-label"></span>)</label>
             </div>
           </div>
         </div>
 
         <fieldset id="expansion-box">
-          <legend>Bővülés</legend>
+          <legend>Beruházások és egyszeri lépések</legend>
           <div class="row" id="expansion-controls"></div>
         </fieldset>
 
@@ -224,10 +285,16 @@
         </div>
       </div>
 
-      <div class="card">
-        <h2>Visszajelzés <span class="small muted">— minden korábbi hónap visszanézhető</span></h2>
-        <div class="feedback-scroll" id="feedback-scroll">
-          <p class="muted small">A hónap lezárása után itt jelennek meg az események, legfelül a legutóbbi hónappal.</p>
+      <div class="col" style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card">
+          <h2>Csapat</h2>
+          <div id="team-panel"></div>
+        </div>
+        <div class="card">
+          <h2>Visszajelzés <span class="small muted">— minden korábbi hónap visszanézhető</span></h2>
+          <div class="feedback-scroll" id="feedback-scroll">
+            <p class="muted small">A hónap lezárása után itt jelennek meg az események, legfelül a legutóbbi hónappal.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -235,9 +302,11 @@
     <div class="card">
       <h2>Alakulás havi bontásban</h2>
       <div class="charts-grid">
-        <div><h3>Pénzkészlet</h3><div class="chart-box"><canvas id="chart-cash"></canvas></div></div>
+        <div><h3>Pénzkészlet (globális)</h3><div class="chart-box"><canvas id="chart-cash"></canvas></div></div>
         <div><h3>Kumulált profit</h3><div class="chart-box"><canvas id="chart-profit"></canvas></div></div>
-        <div><h3>Márkaismertség (brand awareness)</h3><div class="chart-box"><canvas id="chart-awareness"></canvas></div></div>
+        <div><h3>Márkaismertség piaconként</h3><div class="chart-box"><canvas id="chart-awareness-markets"></canvas></div></div>
+        <div><h3>Márkaismertség — Te vs. versenytársak (hazai piac)</h3><div class="chart-box"><canvas id="chart-awareness-competitors"></canvas></div></div>
+        <div><h3>Csapatlétszám</h3><div class="chart-box"><canvas id="chart-team"></canvas></div></div>
       </div>
     </div>
   </div>
@@ -262,198 +331,212 @@
   </div>
 </div>
 
+<!-- HIRE MODAL -->
+<div class="modal-overlay" id="hire-modal" hidden>
+  <div class="modal-box" style="max-width:420px;">
+    <div class="close-row"><button class="btn secondary" id="btn-close-hire-modal">Bezárás</button></div>
+    <h2>Új alkalmazott felvétele</h2>
+    <div id="hire-form"></div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <script>
 "use strict";
 /* =========================================================================================
- * NAPSZEMÜVEG INC. — ÜZLETI SZIMULÁCIÓ
- * Ez a fájl önmagában futtatható, build lépés nélkül (kivéve a Chart.js CDN betöltését).
+ * NAPSZEMÜVEG INC. — ÜZLETI SZIMULÁCIÓ (v2: csapat, terjeszkedés, versenytársak, nehezített piac)
  *
- * FONTOS: az alábbi adó-, járulék- és piaci paraméterek KÖZELÍTŐ, OKTATÁSI CÉLÚ becslések
- * a 2026-os nyilvánosan ismert magyar szabályozás alapján. A valóságban ennél sokkal több
- * kivétel, határeset és adminisztrációs szabály létezik — ez a modell szándékosan
- * leegyszerűsített, hogy tanulható és átlátható maradjon. NEM helyettesíti a könyvelői
- * vagy adótanácsadói konzultációt.
+ * FONTOS: az alábbi adó-, járulék-, bér- és piaci paraméterek KÖZELÍTŐ, OKTATÁSI CÉLÚ becslések
+ * a 2026-os nyilvánosan ismert magyar szabályozás alapján, a külföldi piacoknál pedig erősen
+ * leegyszerűsített közelítések. NEM helyettesíti a könyvelői / adótanácsadói / szabadalmi ügyvivői
+ * konzultációt.
+ *
+ * A fájl szerkezete (könnyű bővíthetőség miatt):
+ *   1) CONFIG              — minden finomhangolható paraméter
+ *   2) segédfüggvények     — formázás, matek
+ *   3) állapot (state)     — initState()
+ *   4) piaci/kereslet modell (hazai spatial verseny + export piacok)
+ *   5) gyártói rendelés / szállítmányok
+ *   6) csapat (alkalmazottak)
+ *   7) havi szimuláció fő függvénye: runMonth()
+ *   8) UI: setup, döntési panel, világtérkép, csapatpanel, grafikonok
+ *   9) játék vége
  * ========================================================================================= */
 
 const CONFIG = {
 
-  // ---- Általános ----
-  totalMonths: 24,
+  gameLengthOptions: [24, 48],
   startingCash: 2000000,
 
-  // ---- Kft. alapítási feltételek ----
-  kft: {
-    minTorzstoke: 3000000,
-    foundingCostMin: 50000,
-    foundingCostMax: 100000,
-    corporateTaxRate: 0.09, // társasági adó (TAO), a havi pozitív adózás előtti eredményre
+  warehouse: {
+    homeCapacityMin: 300, homeCapacityMax: 500,
+    externalRent: 90000, externalCapacityBonus: 1500,
+    ownedPurchaseCost: 3500000, ownedCapacityBonus: 3000, ownedMaintenance: 40000,
   },
 
-  // ---- 2026-os közterhek (közelítő) ----
   legal: {
-    minWage: 322800,          // bruttó minimálbér Ft/hó (2026)
-    guaranteedMinWage: 373200,// garantált bérminimum Ft/hó (2026)
-    tbRate: 0.185,             // TB-járulék
-    szochoRate: 0.13,          // szociális hozzájárulási adó
-    healthServiceFee: 12300,   // egészségügyi szolgáltatási járulék Ft/hó (ha nincs más jogviszony és a minimumot sem fizetik — ebben a modellben csak tájékoztató jellegű, ld. lentebb)
-    vatRate: 0.27,             // ÁFA
-    hipaRateDefault: 0.02,     // helyi iparűzési adó, alapértelmezett
-    ataloonyTaxFreeAnnualRevenue: 1936800, // átalányadózó EV éves adómentes bevételi sáv (2026)
-    ataloonyIncomeRatio: 0.40, // kereskedelmi tevékenységre jellemző jövedelemhányad
-    szjaRate: 0.15,            // SZJA az átalányadó jövedelemhányadára
+    minWage: 322800, guaranteedMinWage: 373200,
+    tbRate: 0.185, szochoRate: 0.13, healthServiceFee: 12300,
+    vatRateHU: 0.27,
+    ataloonyTaxFreeAnnualRevenue: 1936800, ataloonyIncomeRatio: 0.40, szjaRate: 0.15,
+    hipaRateDefault: 0.02,
+    taoRate: 0.09,
   },
 
-  // Havi kötelező TB+Szocho fő állású vállalkozónak: a minimálbér (EV) ill. garantált
-  // bérminimum (Kft ügyvezető) után, függetlenül a tényleges jövedelemkivéttől.
-  // EV: 0.185+0.13 = 0.315 * 322 800 ≈ 101 682 Ft/hó
-  // Kft ügyvezető: 0.315 * 373 200 ≈ 117 558 Ft/hó
-  // Mellékállású vállalkozónál (van másik, biztosított munkahely) ez nem kötelező.
+  kft: {
+    minTorzstoke: 3000000, foundingCostMin: 50000, foundingCostMax: 100000,
+    midGameConversion: { minCashRequired: 5000000, legalCostMin: 100000, legalCostMax: 250000 },
+  },
 
-  // ---- Fix havi működési költségek (tartományból választott, végig fix érték a játékban) ----
   fixedCosts: {
-    accountant: { min: 15000, max: 35000 },
-    invoicingSoftware: { min: 3000, max: 8000 },
+    accountant: { min: 15000, max: 35000, perEmployeeExtra: 1500 },
+    invoicing: { min: 3000, max: 8000 },
     webshop: { min: 5000, max: 15000 },
     bankFee: { min: 2000, max: 6000 },
+    insurance: { monthly: 12000 },
   },
 
-  // ---- Raktár ----
-  warehouse: {
-    homeCapacityMin: 300,
-    homeCapacityMax: 500,
-    externalRent: 90000,        // Ft/hó
-    externalCapacityBonus: 1500,// db
+  oneTime: {
+    website: {
+      basic: { cost: 400000, label: "Sablon alapú webshop (400 000 Ft)", conversionBonus: 0.0 },
+      custom: { cost: 1200000, label: "Egyedi fejlesztésű webshop (1 200 000 Ft)", conversionBonus: 0.12 },
+    },
+    websiteMaintenanceAnnualRatio: 0.12,
+    trademarkHU: 81000,
+    trademarkEU: { min: 340000, max: 400000 },
+    designProtection: { min: 50000, max: 150000 },
+    qaInspection: { min: 150000, max: 400000, defectCap: 0.03 },
   },
 
-  // ---- Részmunkaidős segítség ----
-  partTimeHelper: {
-    grossWage: 200000,          // Ft/hó bruttó
-    employerSzochoRate: 0.13,   // munkáltatói szocho a bérre
-    // hatása: csökkenti a garanciális/visszaküldési adminisztrációs veszteséget
-    returnWarrantyReduction: 0.25, // 25%-kal kevesebb effektív veszteség
-    orderCapacityBonus: 300,        // eladható darab/hó plusz kapacitás (csomagolás/kiszállítás)
+  employees: {
+    szochoRate: 0.13,
+    cafeteriaMultiplier: 1.05,
+    roles: {
+      warehouse: { label: "Csomagolás / raktár", wageFullMin: 350000, wageFullMax: 450000, capacityFull: 600, capacityPart: 300 },
+      support: { label: "Ügyfélszolgálat", wageFullMin: 380000, wageFullMax: 480000, returnReduction: 0.18, warrantyReduction: 0.18 },
+      marketing: { label: "Marketing szakember", wageFullMin: 500000, wageFullMax: 750000, marketingEffMultiplier: 0.35 },
+      designer: { label: "Termékfejlesztő / designer", wageFullMin: 500000, wageFullMax: 800000, qualityPerceptionBonus: 0.08 },
+      country_manager: { label: "Országmenedzser", wageFullMin: 550000, wageFullMax: 850000, awarenessGrowthBonus: 0.30 },
+    },
+    warehouseThresholdUnitsNoPenalty: 350,
+    noStaffDefectPenalty: 0.05,
   },
 
-  // ---- Gyártási minőségi szintek (Ft/db beszerzési ár, Kína) ----
+  transaction: { paymentFeePct: 0.026, paymentFeeFixed: 90, courierFeePerOrder: 1290, avgUnitsPerOrder: 1.4 },
+
   qualityTiers: [
-    { id: "alap",    label: "Alap minőség (~2 500 Ft/db)",    baseCost: 2500, defectRateBonus: 0.02, positionFit: -8 },
-    { id: "kozepes", label: "Közepes minőség (~4 500 Ft/db)", baseCost: 4500, defectRateBonus: 0.0,  positionFit: 0  },
-    { id: "premium", label: "Prémium minőség (~8 000 Ft/db)", baseCost: 8000, defectRateBonus: -0.015, positionFit: 10 },
+    { id: "alap", label: "Alap minőség (~2 800 Ft/db)", baseCost: 2800, defectRateBonus: 0.02, positionFit: -8 },
+    { id: "kozepes", label: "Közepes minőség (~5 000 Ft/db)", baseCost: 5000, defectRateBonus: 0.0, positionFit: 0 },
+    { id: "premium", label: "Prémium minőség (~8 800 Ft/db)", baseCost: 8800, defectRateBonus: -0.015, positionFit: 10 },
   ],
 
-  // ---- Csomagolási minőségi szintek (Ft/db) ----
   packagingTiers: [
     { id: "egyszeru", label: "Egyszerű (~200 Ft/db)", cost: 200 },
-    { id: "kozepes",  label: "Közepes (~400 Ft/db)",  cost: 400 },
-    { id: "premium",  label: "Prémium (~800 Ft/db)",  cost: 800 },
+    { id: "kozepes", label: "Közepes (~400 Ft/db)", cost: 400 },
+    { id: "premium", label: "Prémium (~800 Ft/db)", cost: 800 },
   ],
 
-  // ---- Tranzakciós / logisztikai költségek ----
-  transaction: {
-    paymentFeePct: 0.025,     // fizetési szolgáltató jutaléka
-    paymentFeeFixed: 90,      // Ft/tranzakció
-    courierFeePerOrder: 1290, // Ft/rendelés
-    avgUnitsPerOrder: 1.4,
-  },
+  suppliers: [
+    { id: "default", label: "Jelenlegi kínai gyártó (bevált kapcsolat)", costMultiplier: 1.0, defectMin: 0.02, defectMax: 0.08 },
+    { id: "cheap", label: "Alternatív gyártó — olcsóbb, kockázatosabb (-15% ár)", costMultiplier: 0.85, defectMin: 0.04, defectMax: 0.12 },
+    { id: "reliable", label: "Alternatív gyártó — drágább, megbízhatóbb (+18% ár)", costMultiplier: 1.18, defectMin: 0.01, defectMax: 0.05 },
+  ],
+  supplierSwitch: { cost: 220000, transitionMonths: 2, transitionDefectExtra: 0.05 },
+  supplierPriceIncrease: { quarterlyChance: 0.22, minPct: 0.03, maxPct: 0.12 },
+  volumeDiscountTiers: [ { minQty: 1000, discount: 0.08 }, { minQty: 2500, discount: 0.15 } ],
 
-  // ---- Gyártói rendelés / cash flow ----
-  supplier: {
-    depositRatioMin: 0.30,
-    depositRatioMax: 0.50,
-    monthsToRemainderPayment: 1, // előleg után ennyi hónappal esedékes a maradék
-    monthsToArrival: 2,          // rendeléstől számítva ennyi hónap múlva érkezik meg eladhatóan
-    dutyRatePct: 0.03,           // becsült vámteher a beszerzési érték %-ában
-    importVatRate: 0.27,         // import ÁFA (visszaigényelhető)
-    customsBrokerFee: 15000,     // Ft/rendelés, opcionális fix díj
-  },
+  supplierDeposit: { min: 0.30, max: 0.50 },
+  supplierTiming: { monthsToRemainder: 1, monthsToArrival: 2 },
+  importDuty: { dutyRatePct: 0.03, importVatRateHU: 0.27, brokerFee: 15000 },
 
-  // ---- Kockázatok ----
   risk: {
-    damagedGoodsMin: 0.01, damagedGoodsMax: 0.08,     // rendelésenkénti selejt/sérülés
-    severeCustomsEventChance: 0.03,                    // havi/rendelésenkénti esély teljes fennakadásra
-    severeCustomsEventLossMin: 0.5, severeCustomsEventLossMax: 1.0, // az érintett szállítmány ekkora hányada vész oda
-    fxSwingMin: -0.08, fxSwingMax: 0.08,                // árfolyamkockázat, beszerzési árra hat rendelésenként
-    returnRateMin: 0.02, returnRateMax: 0.05,           // vevői visszaküldés az eladott darabok %-ában
-    warrantyRateMin: 0.005, warrantyRateMax: 0.02,      // garanciális csere az eladott darabok %-ában
+    damagedGoodsMin: 0.01, damagedGoodsMax: 0.08,
+    severeCustomsEventChance: 0.03, severeCustomsEventLossMin: 0.5, severeCustomsEventLossMax: 1.0,
+    fxSwingMin: -0.08, fxSwingMax: 0.08,
+    returnRateMin: 0.02, returnRateMax: 0.05,
+    warrantyRateMin: 0.005, warrantyRateMax: 0.02,
+    copycatAnnualChance: { none: 0.06, trademarkHU: 0.025, full: 0.005 },
+    copycatAwarenessLossMin: 8, copycatAwarenessLossMax: 16,
   },
 
-  // ---- Szezonalitás (hónap 1-12 ciklikusan, 1=január) ----
-  seasonality: {
-    // index: 0=jan .. 11=dec
-    multipliers: [0.65, 0.6, 0.85, 1.0, 1.5, 1.7, 1.75, 1.5, 1.0, 0.85, 0.65, 0.6],
-  },
+  seasonality: { multipliers: [0.6, 0.55, 0.85, 1.0, 1.5, 1.7, 1.8, 1.5, 1.0, 0.85, 0.6, 0.55] },
 
-  // ---- Piaci / pozicionálási modell ----
   market: {
-    totalMonthlyPotentialCustomers: 1800, // teljes elérhető vevőkör mérete (havi, szezon előtt), a teljes piacon (játékos+4 versenytárs)
-    overlapSigma: 16,       // mekkora pozíció-távolságnál csökken jelentősen az átfedés (Gauss-görbe szélessége)
-    minDensity: 0.4, maxDensity: 1.3, // piaci "sűrűség" a pozíció-skála szélein vs. közepén
-    priceFactorSensitivity: 0.8,
-    minIdealPrice: 7000, maxIdealPrice: 130000, // elvárt ár a pozíció-skála két végén
-    marketingRefSpend: 150000, // ekkora havi költésnél ér el kb. "1 egység" marketing-hatást
-    awarenessDecayNoMarketing: 2, // pontban, ha nincs marketingköltés
-    awarenessBigJumpThreshold: 15, // ekkora pozícióváltás felett "zavart" okoz a márkánál
+    huTotalMonthlyPotentialCustomers: 1100,
+    overlapSigma: 16, minDensity: 0.4, maxDensity: 1.3,
+    priceFactorSensitivity: 0.8, minIdealPrice: 7000, maxIdealPrice: 130000,
+    marketingRefSpend: 220000,
+    marketingMaxBoost: 1.1,
+    awarenessDecayNoMarketing: 2.5,
+    awarenessBigJumpThreshold: 15,
+    awarenessGrowthK: 6,
+    backgroundNoise: { centerPos: 35, width: 25, maxPenalty: 0.18 },
+    exportGenericCompetitionDamp: 0.55,
   },
 
   distribution: {
-    mass:  { reachMultiplier: 1.0,  awarenessBonus: 0.0,  luxuryPenaltyAbovePos: 60 },
-    drop:  { reachMultiplier: 0.65, awarenessBonus: 0.15, luxuryPenaltyAbovePos: 999 },
-    seed:  { reachMultiplier: 0.32, awarenessBonus: 0.35, luxuryPenaltyAbovePos: 999 },
+    mass: { reachMultiplier: 1.0, awarenessBonus: 0.0, luxuryPenaltyAbovePos: 60 },
+    drop: { reachMultiplier: 0.65, awarenessBonus: 0.15, luxuryPenaltyAbovePos: 999 },
+    seed: { reachMultiplier: 0.32, awarenessBonus: 0.35, luxuryPenaltyAbovePos: 999 },
   },
 
-  // ---- 4 fix AI versenytárs ----
-  // volumeCap: mennyire "engedi ki" a nyers piaci allokációt ténylegesen eladott darabszámmá —
-  // ez fejezi ki a fix stratégiájukat (pl. a luxusmárka SZÁNDÉKOSAN alacsony volumenű marad
-  // még akkor is, ha nyers vonzereje nagyobb allokációt engedne meg).
   competitors: [
-    {
-      key: "mass", name: "Tömegpiaci márka", position: 10, price: 9990,
-      marketingSpend: 250000, cogsRatio: 0.35, startingAwareness: 20, awarenessCap: 85,
-      growthRate: 1.15, startingCapital: 5000000, volumeCap: 1.0,
-      color: "#e05252",
-    },
-    {
-      key: "accessible", name: "Elérhető prémium márka", position: 35, price: 34990,
-      marketingSpend: 180000, cogsRatio: 0.30, startingAwareness: 45, awarenessCap: 92,
-      growthRate: 0.85, startingCapital: 8000000, volumeCap: 0.7,
-      color: "#e0a52e",
-    },
-    {
-      key: "design", name: "Dizájn-fókuszú prémium márka", position: 60, price: 54990,
-      marketingSpend: 220000, cogsRatio: 0.28, startingAwareness: 15, awarenessCap: 80,
-      growthRate: 1.05, startingCapital: 4000000, volumeCap: 0.45,
-      color: "#7b3fe4",
-    },
-    {
-      key: "luxury", name: "Luxus / exkluzív márka", position: 90, price: 189990,
-      marketingSpend: 90000, cogsRatio: 0.22, startingAwareness: 35, awarenessCap: 60,
-      growthRate: 0.55, startingCapital: 15000000, volumeCap: 0.15,
-      color: "#0f9b8e",
-    },
+    { key: "mass", name: "Tömegpiaci márka", position: 10, price: 9990, marketingSpend: 250000, cogsRatio: 0.35, startingAwareness: 20, awarenessCap: 85, growthRate: 1.1, startingCapital: 5000000, volumeCap: 1.0, color: "#e05252" },
+    { key: "accessible", name: "Elérhető prémium márka", position: 35, price: 34990, marketingSpend: 180000, cogsRatio: 0.30, startingAwareness: 45, awarenessCap: 92, growthRate: 0.8, startingCapital: 8000000, volumeCap: 0.7, color: "#e0a52e" },
+    { key: "design", name: "Dizájn-fókuszú prémium márka", position: 60, price: 54990, marketingSpend: 220000, cogsRatio: 0.28, startingAwareness: 15, awarenessCap: 80, growthRate: 1.0, startingCapital: 4000000, volumeCap: 0.45, color: "#7b3fe4" },
+    { key: "luxury", name: "Luxus / exkluzív márka", position: 90, price: 189990, marketingSpend: 90000, cogsRatio: 0.22, startingAwareness: 35, awarenessCap: 60, growthRate: 0.5, startingCapital: 15000000, volumeCap: 0.15, color: "#0f9b8e" },
   ],
 
-  // ---- Csőd ----
-  bankruptcy: {
-    cashThreshold: -150000,
-    consecutiveMonthsAllowed: 2,
+  markets: {
+    v4: {
+      key: "v4", name: "Szlovákia / Ausztria / Csehország", vatRate: 0.213,
+      vatNote: "SK 23% / AT 20% / CZ 21% — egyszerűsítve egy átlagolt kulccsal kezelve",
+      customs: false, sizeFactor: 0.55, entryCostMin: 400000, entryCostMax: 700000,
+      maintenanceExtra: 30000, marketingCostMultiplier: 1.0, requiresKft: false, idealPriceFactor: 1.0,
+      pro: "Közeli, kulturálisan hasonló piac, nincs vámhatár (EU belső piac).",
+      con: "Közepes verseny, több nyelven kell ügyfélszolgálat.",
+    },
+    de: {
+      key: "de", name: "Németország", vatRate: 0.19, vatNote: "Német ÁFA (Mehrwertsteuer) általános kulcsa",
+      customs: false, sizeFactor: 1.3, entryCostMin: 900000, entryCostMax: 1400000,
+      maintenanceExtra: 60000, marketingCostMultiplier: 1.4, requiresKft: true, idealPriceFactor: 1.05,
+      pro: "Nagy, fizetőképes piac.",
+      con: "Erős verseny, drága hirdetési piac, kötelező lokalizáció. Csak Kft formában elérhető.",
+    },
+    uk: {
+      key: "uk", name: "Egyesült Királyság", vatRate: 0.20, vatNote: "Brit ÁFA (VAT) általános kulcsa",
+      customs: true, dutyRatePct: 0.04, sizeFactor: 1.1, entryCostMin: 700000, entryCostMax: 1100000,
+      maintenanceExtra: 50000, marketingCostMultiplier: 1.2, requiresKft: false, idealPriceFactor: 1.0,
+      pro: "Nagy, jó vásárlóerejű piac.",
+      con: "Brexit utáni vámhatár, bonyolultabb logisztika és vámkezelés.",
+    },
+    us: {
+      key: "us", name: "Egyesült Államok", vatRate: 0.07, vatNote: "Közelítő átlagos állami forgalmi adó (sales tax)",
+      customs: true, dutyRatePct: 0.03, sizeFactor: 1.8, entryCostMin: 1500000, entryCostMax: 2500000,
+      maintenanceExtra: 90000, marketingCostMultiplier: 1.6, requiresKft: true, idealPriceFactor: 1.1,
+      pro: "A legnagyobb potenciális piaci volumen.",
+      con: "Magas belépési marketingköltség, vámkezelés, államonként eltérő forgalmi adó. Csak Kft formában elérhető.",
+    },
+    ro: {
+      key: "ro", name: "Románia", vatRate: 0.19, vatNote: "Román ÁFA általános kulcsa",
+      customs: false, sizeFactor: 0.5, entryCostMin: 250000, entryCostMax: 450000,
+      maintenanceExtra: 20000, marketingCostMultiplier: 0.7, requiresKft: false, idealPriceFactor: 0.75,
+      pro: "Alacsony belépési korlát, olcsóbb hirdetési piac.",
+      con: "Alacsonyabb átlagos vásárlóerő — csak mérsékeltebb áron versenyképes.",
+    },
   },
+
+  bankruptcy: { cashThreshold: -150000, consecutiveMonthsAllowed: 2 },
 };
 
 // ============================= SEGÉDFÜGGVÉNYEK =============================
 
-function ft(n){
-  const r = Math.round(n);
-  return r.toLocaleString("hu-HU") + " Ft";
-}
-function ftSigned(n){
-  const r = Math.round(n);
-  return (r>=0? "+":"") + r.toLocaleString("hu-HU") + " Ft";
-}
+function ft(n){ return Math.round(n).toLocaleString("hu-HU") + " Ft"; }
+function ftSigned(n){ const r = Math.round(n); return (r>=0?"+":"") + r.toLocaleString("hu-HU") + " Ft"; }
 function clamp(v,lo,hi){ return Math.max(lo, Math.min(hi, v)); }
 function randRange(lo,hi){ return lo + Math.random()*(hi-lo); }
-function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function monthSeasonIndex(month){ return (month-1) % 12; } // 1=jan
+function roundTo(v, step){ return Math.round(v/step)*step; }
+function monthSeasonIndex(month){ return (month-1) % 12; }
 function seasonalMultiplier(month){ return CONFIG.seasonality.multipliers[monthSeasonIndex(month)]; }
 function seasonLabel(month){
   const m = monthSeasonIndex(month);
@@ -464,23 +547,30 @@ function seasonLabel(month){
   else if(mult <= 0.7) tag = "Téli mélypont";
   return names[m] + " — " + tag + " (kereslet szorzó: " + mult.toFixed(2) + "x)";
 }
+// telítődő (csökkenő hozadékú) marketing-görbe: spend=0 -> 0, spend->∞ -> 1
+function marketingEffect(spend, ref){
+  if(spend<=0) return 0;
+  return 1 - Math.exp(-spend/Math.max(1,ref));
+}
 
 // ============================= JÁTÉKÁLLAPOT =============================
 
 let state = null;
+let nextEmployeeId = 1;
 
-function initState(bizForm, jobStatus){
+function initState(bizForm, jobStatus, gameLength){
   const homeCapacity = Math.round(randRange(CONFIG.warehouse.homeCapacityMin, CONFIG.warehouse.homeCapacityMax));
-  const accountant = Math.round(randRange(CONFIG.fixedCosts.accountant.min, CONFIG.fixedCosts.accountant.max)/1000)*1000;
-  const invoicing = Math.round(randRange(CONFIG.fixedCosts.invoicingSoftware.min, CONFIG.fixedCosts.invoicingSoftware.max)/500)*500;
-  const webshop = Math.round(randRange(CONFIG.fixedCosts.webshop.min, CONFIG.fixedCosts.webshop.max)/500)*500;
-  const bankFee = Math.round(randRange(CONFIG.fixedCosts.bankFee.min, CONFIG.fixedCosts.bankFee.max)/500)*500;
+  const accountant = roundTo(randRange(CONFIG.fixedCosts.accountant.min, CONFIG.fixedCosts.accountant.max), 1000);
+  const invoicing = roundTo(randRange(CONFIG.fixedCosts.invoicing.min, CONFIG.fixedCosts.invoicing.max), 500);
+  const webshopHosting = roundTo(randRange(CONFIG.fixedCosts.webshop.min, CONFIG.fixedCosts.webshop.max), 500);
+  const bankFee = roundTo(randRange(CONFIG.fixedCosts.bankFee.min, CONFIG.fixedCosts.bankFee.max), 500);
 
   let cash = CONFIG.startingCash;
-  let foundingCost = 0;
+  let lockedCapital = 0;
   if(bizForm === "kft"){
-    foundingCost = Math.round(randRange(CONFIG.kft.foundingCostMin, CONFIG.kft.foundingCostMax)/1000)*1000;
-    cash = cash - foundingCost; // feltételezzük, hogy a törzstőkét külön biztosítják, csak az alapítási költség terheli a induló kasszát
+    const foundingCost = roundTo(randRange(CONFIG.kft.foundingCostMin, CONFIG.kft.foundingCostMax), 1000);
+    cash = cash - foundingCost;
+    lockedCapital = CONFIG.kft.minTorzstoke;
   }
 
   const competitors = CONFIG.competitors.map(c => ({
@@ -491,48 +581,85 @@ function initState(bizForm, jobStatus){
     history: { cash: [c.startingCapital], profit: [0], awareness: [c.startingAwareness] },
   }));
 
+  const markets = { hu: { active: true, awareness: 0, price: 24990, marketing: 80000, entryMonth: 1 } };
+  for(const key of Object.keys(CONFIG.markets)){
+    markets[key] = { active: false, awareness: 0, price: null, marketing: 0, entryMonth: null,
+      entryCost: roundTo(randRange(CONFIG.markets[key].entryCostMin, CONFIG.markets[key].entryCostMax), 5000) };
+  }
+
   state = {
-    bizForm, jobStatus,
+    bizForm, jobStatus, gameLength,
     month: 1,
     cash,
     cumulativeProfit: 0,
+    lockedCapital,
     inventory: 0,
     avgUnitCost: 0,
     warehouseHomeCapacity: homeCapacity,
     warehouseExternal: false,
-    hasHelper: false,
+    warehouseOwned: false,
+    hasInsurance: false,
     position: 40,
     prevPosition: 40,
-    fixed: { accountant, invoicing, webshop, bankFee },
-    shipments: [], // {orderedMonth, qty, unitCost, dutyCost, brokerFee, remainderMonth, remainderAmount, remainderPaid, arrivalMonth, arrived}
-    awareness: 0,
-    consecutiveNegativeCash: 0,
-    bankrupt: false,
-    bankruptMonth: null,
-    // adóhatár-követés (12 havi "év" ciklusban)
-    annualNetRevenue: 0,
-    // negyedéves göngyölítés
-    quarter: { outputVat:0, inputVat:0, hipaBase:0, corpProfitAccrued:0 },
-    history: { cash: [cash], profit: [0], awareness: [0], months:[0] },
-    lastMonthResult: null,
-    monthlyRecords: [], // { month, log, monthCosts } minden lezárt hónapról, hogy visszanézhetők legyenek
+    fixed: { accountant, invoicing, webshop: webshopHosting, bankFee },
+    selectedSupplierId: "default",
+    supplierCostMultiplier: 1.0,
+    supplierTransitionMonthsLeft: 0,
+    pendingSupplierIncrease: null,
+    pendingExpansionCost: 0,
+    shipments: [],
+    ipProtection: { trademarkHU: false, trademarkEU: false, designProtection: false },
+    website: { tier: null },
+    employees: [],
+    markets,
     competitors,
-    gameOver: false,
+    annualNetRevenueTotal: 0,
+    quarter: { outputVat: {}, inputVat: 0, hipaBase: 0, corpProfitAccrued: 0 },
+    consecutiveNegativeCash: 0,
+    bankrupt: false, bankruptMonth: null,
+    history: { cash: [cash], profit: [0], teamSize: [0], months: [0],
+      marketAwareness: { hu: [0], v4: [0], de: [0], uk: [0], us: [0], ro: [0] } },
+    lastMonthResult: null,
+    monthlyRecords: [],
   };
 }
 
-function currentQualityTier(){ return CONFIG.qualityTiers.find(q=>q.id===state.selectedQualityId) || CONFIG.qualityTiers[1]; }
-function currentPackagingTier(){ return CONFIG.packagingTiers.find(p=>p.id===state.selectedPackagingId) || CONFIG.packagingTiers[0]; }
-
+function activeMarketKeys(){ return Object.keys(state.markets).filter(k=>state.markets[k].active); }
 function warehouseCapacity(){
-  return state.warehouseHomeCapacity + (state.warehouseExternal ? CONFIG.warehouse.externalCapacityBonus : 0);
+  return state.warehouseHomeCapacity
+    + (state.warehouseExternal ? CONFIG.warehouse.externalCapacityBonus : 0)
+    + (state.warehouseOwned ? CONFIG.warehouse.ownedCapacityBonus : 0);
+}
+function incomingUnits(){ return state.shipments.filter(s=>!s.arrived).reduce((a,s)=>a+s.qty,0); }
+function employeesByRole(role){ return state.employees.filter(e=>e.role===role); }
+function warehouseStaffCapacity(){
+  return employeesByRole("warehouse").reduce((a,e)=> a + (e.fullTime ? CONFIG.employees.roles.warehouse.capacityFull : CONFIG.employees.roles.warehouse.capacityPart), 0);
+}
+function marketingEffMultiplier(){
+  const n = employeesByRole("marketing").length;
+  return clamp(1 + n*CONFIG.employees.roles.marketing.marketingEffMultiplier, 1, 2.2);
+}
+function qualityPerceptionMultiplier(){
+  const n = employeesByRole("designer").length;
+  return clamp(1 + n*CONFIG.employees.roles.designer.qualityPerceptionBonus, 1, 1.4);
+}
+function supportLossMultiplier(){
+  const n = employeesByRole("support").length;
+  const reduction = clamp(n*CONFIG.employees.roles.support.returnReduction, 0, 0.7);
+  return 1 - reduction;
+}
+function countryManagerBonus(marketKey){
+  const has = state.employees.some(e=>e.role==="country_manager" && e.market===marketKey);
+  return has ? CONFIG.employees.roles.country_manager.awarenessGrowthBonus : 0;
+}
+function ipProtectionLevel(){
+  const p = state.ipProtection;
+  if(p.trademarkHU && p.trademarkEU && p.designProtection) return "full";
+  if(p.trademarkHU) return "trademarkHU";
+  return "none";
 }
 
-function incomingUnits(){
-  return state.shipments.filter(s=>!s.arrived).reduce((a,s)=>a+s.qty,0);
-}
-
-// ============================= PIACI / VERSENY MODELL =============================
+// ============================= PIACI / KERESLET MODELL =============================
 
 function marketDensity(position){
   const t = clamp(position,0,100)/100;
@@ -543,70 +670,54 @@ function idealPriceForPosition(position){
   const t = clamp(position,0,100)/100;
   return CONFIG.market.minIdealPrice + (CONFIG.market.maxIdealPrice-CONFIG.market.minIdealPrice)*t;
 }
-function priceFactor(price, position){
-  const ideal = idealPriceForPosition(position);
-  const diff = Math.abs(price-ideal)/ideal;
+function priceFactorGeneric(price, idealPrice){
+  const diff = Math.abs(price-idealPrice)/idealPrice;
   return clamp(1 - diff*CONFIG.market.priceFactorSensitivity, 0.15, 1.35);
-}
-function marketingBoost(spend){
-  if(spend<=0) return 0;
-  return clamp(Math.sqrt(spend/CONFIG.market.marketingRefSpend)*0.55, 0, 1.4);
 }
 function overlapWeight(posA,posB){
   const d = posA-posB;
   return Math.exp(-(d*d)/(2*CONFIG.market.overlapSigma*CONFIG.market.overlapSigma));
 }
-
-// Egy "résztvevő" listát épít (játékos + 4 versenytárs) az adott havi piaci allokáció kiszámításához.
-function buildParticipants(month, playerDecision){
-  const list = [];
-  list.push({
-    key:"player", isPlayer:true,
-    position: playerDecision.position,
-    price: playerDecision.price,
-    awareness: state.awareness,
-    marketingSpend: playerDecision.marketing,
-  });
-  for(const c of state.competitors){
-    list.push({
-      key:c.key, isPlayer:false,
-      position:c.position, price:c.price, awareness:c.awareness, marketingSpend:c.marketingSpend,
-      volumeCap: c.volumeCap,
-    });
-  }
-  return list;
+function backgroundNoisePenalty(position){
+  const bn = CONFIG.market.backgroundNoise;
+  const d = position - bn.centerPos;
+  const shape = Math.exp(-(d*d)/(2*bn.width*bn.width));
+  return 1 - bn.maxPenalty*shape;
 }
 
-// Térbeli (Hotelling-jellegű) versenymodell: a teljes havi vevőkör a 0-100-as
-// exkluzivitás-skála mentén oszlik el (density-görbével súlyozva), és minden pontban
-// az adott ponthoz legközelebb eső / legvonzóbb márka viszi el a vevőket. Ez biztosítja,
-// hogy a résztvevők (játékos + 4 versenytárs) között kiosztott összes darabszám sose
-// haladja meg a ténylegesen elérhető teljes piacot — nem "5 külön független pool"-ból
-// dolgozunk, hanem egyetlen, közösen felosztott vevőkörből.
-const MARKET_GRID_STEP = 2; // 0..100, 2 pontonként mintavételezve (51 pont)
+const MARKET_GRID_STEP = 2;
 
-function computeAllocations(month, playerDecision){
+function computeHuAllocations(month, decision){
   const seasonal = seasonalMultiplier(month);
-  const participants = buildParticipants(month, playerDecision);
+  const mEff = marketingEffMultiplier();
+  const qEff = qualityPerceptionMultiplier();
+
+  const participants = [
+    { key:"player", isPlayer:true, position: decision.position, price: state.markets.hu.price,
+      awareness: state.markets.hu.awareness, marketingSpend: state.markets.hu.marketing * mEff },
+    ...state.competitors.map(c=>({ key:c.key, isPlayer:false, position:c.position, price:c.price, awareness:c.awareness, marketingSpend:c.marketingSpend, volumeCap:c.volumeCap })),
+  ];
 
   const attractiveness = {};
   for(const p of participants){
-    const pf = priceFactor(p.price, p.position);
-    const mb = marketingBoost(p.marketingSpend);
-    attractiveness[p.key] = Math.max(0.01, (p.awareness/100)) * pf * (1+mb);
+    const pf = priceFactorGeneric(p.price, idealPriceForPosition(p.position));
+    const mb = marketingEffect(p.marketingSpend, CONFIG.market.marketingRefSpend) * CONFIG.market.marketingMaxBoost;
+    let a = Math.max(0.01, p.awareness/100) * pf * (1+mb);
+    if(p.isPlayer) a *= qEff;
+    attractiveness[p.key] = a;
   }
 
-  // rácspontok súlyozása a density-görbével, normalizálva úgy, hogy az átlagos súly 1 legyen
   const grid = [];
   let densitySum = 0;
-  for(let x=0; x<=100; x+=MARKET_GRID_STEP){ const d = marketDensity(x); grid.push({x, d}); densitySum += d; }
+  for(let x=0; x<=100; x+=MARKET_GRID_STEP){ const d = marketDensity(x); grid.push({x,d}); densitySum += d; }
   const densityAvg = densitySum/grid.length;
 
-  const totalPool = CONFIG.market.totalMonthlyPotentialCustomers * seasonal * randRange(0.94,1.06);
+  const totalPool = CONFIG.market.huTotalMonthlyPotentialCustomers * seasonal * randRange(0.94,1.06);
   const units = {}; participants.forEach(p=>units[p.key]=0);
 
   for(const gp of grid){
-    const customersHere = totalPool * (gp.d/densityAvg) / grid.length;
+    const noise = backgroundNoisePenalty(gp.x);
+    const customersHere = totalPool * (gp.d/densityAvg) / grid.length * noise;
     let weightSum = 0;
     const weights = {};
     for(const p of participants){
@@ -625,7 +736,7 @@ function computeAllocations(month, playerDecision){
   for(const p of participants){
     let u = units[p.key];
     if(p.isPlayer){
-      const distCfg = CONFIG.distribution[playerDecision.distribution];
+      const distCfg = CONFIG.distribution[decision.distribution];
       u *= distCfg.reachMultiplier;
     } else if(p.volumeCap!==undefined){
       u *= p.volumeCap;
@@ -635,57 +746,81 @@ function computeAllocations(month, playerDecision){
   return results;
 }
 
-// ============================= MEGRENDELÉSEK / SZÁLLÍTMÁNYOK =============================
+function computeExportDemand(marketKey, decision){
+  const cfg = CONFIG.markets[marketKey];
+  const mstate = state.markets[marketKey];
+  const seasonal = seasonalMultiplier(state.month);
+  const mEff = marketingEffMultiplier();
+  const qEff = qualityPerceptionMultiplier();
+  const idealPrice = idealPriceForPosition(decision.position) * cfg.idealPriceFactor;
+  const pf = priceFactorGeneric(mstate.price, idealPrice);
+  const ref = CONFIG.market.marketingRefSpend * cfg.marketingCostMultiplier;
+  const mb = marketingEffect(mstate.marketing*mEff, ref) * CONFIG.market.marketingMaxBoost;
+  const baseline = CONFIG.market.huTotalMonthlyPotentialCustomers * cfg.sizeFactor;
+  const attractiveness = Math.max(0.01, mstate.awareness/100) * pf * (1+mb) * qEff;
+  const distCfg = CONFIG.distribution[decision.distribution];
+  let units = baseline * seasonal * attractiveness * CONFIG.market.exportGenericCompetitionDamp * distCfg.reachMultiplier * randRange(0.9,1.1);
+  return Math.max(0, units);
+}
 
-function placeOrder(qty, quality){
-  if(qty<=0) return { ok:true, message:null };
+// ============================= GYÁRTÓI RENDELÉS / SZÁLLÍTMÁNYOK =============================
+
+function currentSupplier(){ return CONFIG.suppliers.find(s=>s.id===state.selectedSupplierId) || CONFIG.suppliers[0]; }
+
+function volumeDiscountFor(qty){
+  let discount = 0;
+  for(const tier of CONFIG.volumeDiscountTiers){ if(qty>=tier.minQty) discount = Math.max(discount, tier.discount); }
+  return discount;
+}
+
+function placeOrder(qty, quality, log){
+  if(qty<=0) return;
+  const supplier = currentSupplier();
   const fx = 1 + randRange(CONFIG.risk.fxSwingMin, CONFIG.risk.fxSwingMax);
-  const unitCost = Math.round(quality.baseCost * fx);
+  const discount = volumeDiscountFor(qty);
+  const unitCost = Math.round(quality.baseCost * supplier.costMultiplier * state.supplierCostMultiplier * fx * (1-discount));
   const goodsValue = unitCost*qty;
-  const dutyCost = Math.round(goodsValue*CONFIG.supplier.dutyRatePct);
-  const importVat = Math.round(goodsValue*CONFIG.supplier.importVatRate);
-  const brokerFee = CONFIG.supplier.customsBrokerFee;
-  const depositRatio = randRange(CONFIG.supplier.depositRatioMin, CONFIG.supplier.depositRatioMax);
+  const dutyCost = Math.round(goodsValue*CONFIG.importDuty.dutyRatePct);
+  const importVat = Math.round(goodsValue*CONFIG.importDuty.importVatRateHU);
+  const brokerFee = CONFIG.importDuty.brokerFee;
+  const depositRatio = randRange(CONFIG.supplierDeposit.min, CONFIG.supplierDeposit.max);
   const deposit = Math.round(goodsValue*depositRatio);
   const remainderAmount = goodsValue - deposit;
 
   if(deposit + dutyCost + brokerFee > state.cash + 5000){
-    return { ok:false, message:"Nincs elég készpénz az előleg + vám + vámügynöki díj kifizetéséhez." };
+    log.push({type:"bad", text:"Nincs elég készpénz az előleg + vám + vámügynöki díj kifizetéséhez — a rendelés elmaradt."});
+    return;
   }
 
   state.cash -= deposit;
-  state.cash -= brokerFee; // vámügynöki díj rendeléskor
-  const shipment = {
-    orderedMonth: state.month,
-    qty, unitCost, goodsValue, dutyCost, importVat, brokerFee,
-    remainderMonth: state.month + CONFIG.supplier.monthsToRemainderPayment,
-    remainderAmount, remainderPaid: false,
-    arrivalMonth: state.month + CONFIG.supplier.monthsToArrival,
-    arrived: false,
-    fx,
-  };
-  state.shipments.push(shipment);
-  return { ok:true, message: `Megrendelve ${qty} db (minőség: egységár ${ft(unitCost)}). Előleg kifizetve: ${ft(deposit)}. Várható érkezés: ${shipment.arrivalMonth}. hónap.` };
+  state.cash -= brokerFee;
+  state.shipments.push({
+    orderedMonth: state.month, qty, unitCost, goodsValue, dutyCost, importVat, brokerFee,
+    remainderMonth: state.month + CONFIG.supplierTiming.monthsToRemainder, remainderAmount, remainderPaid: false,
+    arrivalMonth: state.month + CONFIG.supplierTiming.monthsToArrival, arrived: false,
+    qaChecked: false, discount,
+  });
+  let msg = `Megrendelve ${qty} db (egységár ${ft(unitCost)}${discount>0?`, ${Math.round(discount*100)}% mennyiségi kedvezménnyel`:""}). Előleg: ${ft(deposit)}. Érkezés: ${state.month + CONFIG.supplierTiming.monthsToArrival}. hónap.`;
+  log.push({type:"info", text: msg});
 }
 
 function processShipmentsForMonth(month, log, monthCosts){
-  // 1) esedékes maradék kifizetések
   for(const s of state.shipments){
     if(!s.remainderPaid && s.remainderMonth===month){
       state.cash -= s.remainderAmount;
       monthCosts.supplierRemainder += s.remainderAmount;
       s.remainderPaid = true;
-      if(state.cash < 0){
-        log.push({type:"bad", text:`A gyártói végösszeg (${ft(s.remainderAmount)}) kifizetése után a kassza negatívba fordult.`});
-      }
     }
   }
-  // 2) megérkező szállítmányok
   for(const s of state.shipments){
     if(!s.arrived && s.arrivalMonth===month){
       s.arrived = true;
       let qty = s.qty;
-      const defectRate = clamp(randRange(CONFIG.risk.damagedGoodsMin, CONFIG.risk.damagedGoodsMax), 0, 1);
+      const supplier = currentSupplier();
+      let defectMin = supplier.defectMin, defectMax = supplier.defectMax;
+      if(state.supplierTransitionMonthsLeft > 0){ defectMax += CONFIG.supplierSwitch.transitionDefectExtra; }
+      let defectRate = clamp(randRange(defectMin, defectMax), 0, 1);
+      if(s.qaChecked) defectRate = Math.min(defectRate, CONFIG.oneTime.qaInspection.defectCap);
       let lostToDefect = Math.round(qty*defectRate);
 
       let severeLoss = 0;
@@ -700,56 +835,87 @@ function processShipmentsForMonth(month, log, monthCosts){
       const stored = Math.min(usable, capacityLeft);
       const overflowLost = usable - stored;
       if(overflowLost>0){
-        log.push({type:"bad", text:`A raktárkapacitás betelt, ${overflowLost} db beérkezett termék nem fért el és megsemmisült / visszaküldésre került.`});
+        log.push({type:"bad", text:`A raktárkapacitás betelt, ${overflowLost} db beérkezett termék nem fért el és megsemmisült.`});
       }
 
-      // súlyozott átlag beszerzési ár frissítése
       const totalCostBefore = state.avgUnitCost*state.inventory;
       const totalCostNew = s.unitCost*stored;
       state.inventory += stored;
       state.avgUnitCost = state.inventory>0 ? (totalCostBefore+totalCostNew)/state.inventory : 0;
 
       if(lostToDefect>0){
-        log.push({type:"bad", text:`${lostToDefect} db sérült/selejt termék érkezett (${Math.round(defectRate*100)}%).`});
+        log.push({type:"bad", text:`${lostToDefect} db sérült/selejt termék érkezett (${Math.round(defectRate*100)}%)${s.qaChecked?" — a minőségbiztosítási ellenőrzés így is korlátozta a kárt":""}.`});
       }
-      monthCosts.importVatRecoverable += s.importVat;
-      monthCosts.dutyAlreadyPaidNote += s.dutyCost; // csak infó, a vám a rendeléskor még nem lett elkönyvelve költségként — itt számoljuk el
-      state.cash -= s.dutyCost; // vámteher az árukiadáskor esedékes
+      state.cash -= s.dutyCost;
       monthCosts.customsDuty += s.dutyCost;
       log.push({type:"info", text:`Megérkezett egy rendelés: ${stored} db eladható készletre került.`});
     }
   }
+  if(state.supplierTransitionMonthsLeft > 0) state.supplierTransitionMonthsLeft--;
 }
+
+function maybeAnnounceSupplierPriceIncrease(log){
+  if(state.pendingSupplierIncrease) return;
+  if(state.month % 3 !== 1) return;
+  if(Math.random() < CONFIG.supplierPriceIncrease.quarterlyChance){
+    const pct = randRange(CONFIG.supplierPriceIncrease.minPct, CONFIG.supplierPriceIncrease.maxPct);
+    state.pendingSupplierIncrease = { pct, effectiveFromMonth: state.month + 1 };
+    log.push({type:"bad", text:`A gyártód bejelentette: a(z) ${state.month+1}. hónaptól ${Math.round(pct*100)}%-kal emeli az egységárat (alapanyag/munkabér hivatkozással). Válthatsz gyártót, vagy elfogadod az áremelést.`});
+  }
+}
+function applySupplierPriceIncreaseIfDue(log){
+  if(state.pendingSupplierIncrease && state.pendingSupplierIncrease.effectiveFromMonth === state.month){
+    state.supplierCostMultiplier *= (1+state.pendingSupplierIncrease.pct);
+    log.push({type:"bad", text:`Életbe lépett a gyártói áremelés: az egységárak ${Math.round(state.pendingSupplierIncrease.pct*100)}%-kal magasabbak lettek.`});
+    state.pendingSupplierIncrease = null;
+  }
+}
+
+// ============================= CSAPAT =============================
+
+function hireEmployee(role, fullTime, marketKey){
+  const cfg = CONFIG.employees.roles[role];
+  const wage = roundTo(randRange(cfg.wageFullMin, cfg.wageFullMax) * (fullTime?1:0.55), 1000);
+  state.employees.push({ id: nextEmployeeId++, role, fullTime, wage, market: marketKey||null, hiredMonth: state.month });
+}
+function fireEmployee(id){ state.employees = state.employees.filter(e=>e.id!==id); }
+function employeeMonthlyCost(e){
+  const base = e.wage * (1+CONFIG.employees.szochoRate);
+  return e.fullTime ? base*CONFIG.employees.cafeteriaMultiplier : base;
+}
+function totalTeamCost(){ return state.employees.reduce((a,e)=>a+employeeMonthlyCost(e), 0); }
 
 // ============================= HAVI SZIMULÁCIÓ =============================
 
 function runMonth(decision){
   const month = state.month;
   const log = [];
+  const marketBreakdown = {};
+
   const monthCosts = {
-    revenueGross:0, unitsSold:0,
-    cogs:0, packaging:0, marketing:decision.marketing, paymentFees:0, courier:0,
-    fixed: state.fixed.accountant+state.fixed.invoicing+state.fixed.webshop+state.fixed.bankFee
-      + (state.warehouseExternal? CONFIG.warehouse.externalRent:0)
-      + (state.hasHelper? Math.round(CONFIG.partTimeHelper.grossWage*(1+CONFIG.partTimeHelper.employerSzochoRate)):0),
-    mandatoryContribution:0,
-    damagedLoss:0, returnsLoss:0, warrantyLoss:0,
-    customsDuty:0, importVatRecoverable:0, dutyAlreadyPaidNote:0,
-    supplierRemainder:0, supplierDeposit:0,
+    revenueGross:0, unitsSold:0, cogs:0,
+    packaging:0, marketing:0, paymentFees:0, courier:0,
+    fixed: state.fixed.accountant + state.employees.length*CONFIG.fixedCosts.accountant.perEmployeeExtra
+      + state.fixed.invoicing + state.fixed.webshop + state.fixed.bankFee
+      + (state.hasInsurance? CONFIG.fixedCosts.insurance.monthly : 0)
+      + (state.warehouseExternal? CONFIG.warehouse.externalRent : 0)
+      + (state.warehouseOwned? CONFIG.warehouse.ownedMaintenance : 0),
+    teamCost: totalTeamCost(),
+    marketMaintenance: activeMarketKeys().filter(k=>k!=="hu").reduce((a,k)=>a+CONFIG.markets[k].maintenanceExtra,0),
+    mandatoryContribution: 0,
+    returnsLoss:0, warrantyLoss:0,
+    customsDuty:0, supplierRemainder:0,
     vatPayable:0, hipaPayable:0, incomeTaxPayable:0, corpTaxPayable:0,
-    expansionCost:0,
+    expansionCost: decision.expansionCostThisMonth || 0,
+    websiteMaintenance: state.website.tier ? Math.round(CONFIG.oneTime.website[state.website.tier].cost * CONFIG.oneTime.websiteMaintenanceAnnualRatio/12) : 0,
   };
 
-  // pozíció-váltás "zavar" ellenőrzés
   const posJump = Math.abs(decision.position - state.prevPosition);
 
-  // 1) beérkező szállítmányok + esedékes fizetések
+  maybeAnnounceSupplierPriceIncrease(log);
+  applySupplierPriceIncreaseIfDue(log);
   processShipmentsForMonth(month, log, monthCosts);
-  if(state.cash < 0){
-    // már a szállítmány-kezelés is negatívba vihette, ezt lentebb a bankruptcy check kezeli
-  }
 
-  // 2) új rendelés leadása (ha kért)
   if(decision.orderQty>0){
     const quality = CONFIG.qualityTiers.find(q=>q.id===decision.qualityId);
     const capLeft = warehouseCapacity() - state.inventory - incomingUnits();
@@ -757,91 +923,104 @@ function runMonth(decision){
     if(qty < decision.orderQty){
       log.push({type:"info", text:`A raktárkapacitás miatt csak ${qty} db-ot sikerült megrendelni a kért ${decision.orderQty} db helyett.`});
     }
-    const res = placeOrder(qty, quality);
-    if(res.message) log.push({type: res.ok?"info":"bad", text: res.message});
+    const shipmentsBefore = state.shipments.length;
+    placeOrder(qty, quality, log);
+    if(decision.qaThisOrder && state.shipments.length > shipmentsBefore){
+      const qaCost = roundTo(randRange(CONFIG.oneTime.qaInspection.min, CONFIG.oneTime.qaInspection.max), 5000);
+      state.cash -= qaCost;
+      monthCosts.expansionCost += qaCost;
+      state.shipments[state.shipments.length-1].qaChecked = true;
+      log.push({type:"info", text:`Független minőségbiztosítási ellenőrzést rendeltél a szállítmányhoz (${ft(qaCost)}).`});
+    }
   }
 
-  // 3) piaci allokáció -> eladott darabszám
-  const allocations = computeAllocations(month, decision);
-  const helperBonus = state.hasHelper? CONFIG.partTimeHelper.orderCapacityBonus : 0;
-  const demandUnits = Math.round(allocations.player.units);
-  const sellable = Math.min(demandUnits, state.inventory + helperBonus*0 /* kapacitás csak feldolgozást segít, készletet nem generál */);
-  const unitsSold = Math.min(demandUnits, state.inventory);
-
-  if(demandUnits > state.inventory){
-    log.push({type:"bad", text:`A kereslet (${demandUnits} db) meghaladta a raktárkészletet (${state.inventory} db) — elmaradt bevétel a készlethiány miatt.`});
-  }
-
-  state.inventory -= unitsSold;
-  monthCosts.unitsSold = unitsSold;
-  const revenueGross = unitsSold*decision.price;
-  monthCosts.revenueGross = revenueGross;
-  const cogs = unitsSold*state.avgUnitCost;
-  monthCosts.cogs = cogs;
-
-  // csomagolás
+  // ---- kereslet / eladás piaconként ----
+  const huAlloc = computeHuAllocations(month, decision);
   const packaging = CONFIG.packagingTiers.find(p=>p.id===decision.packagingId);
-  monthCosts.packaging = unitsSold*packaging.cost;
+  const perMarketDemand = {};
+  for(const key of activeMarketKeys()){
+    perMarketDemand[key] = key==="hu" ? Math.round(huAlloc.player.units) : Math.round(computeExportDemand(key, decision));
+  }
+  const totalDemand = Object.values(perMarketDemand).reduce((a,b)=>a+b,0);
+  let remainingInventory = state.inventory;
+  let totalUnitsSold = 0;
 
-  // tranzakciós díjak
-  const orders = Math.max(0, Math.ceil(unitsSold/CONFIG.transaction.avgUnitsPerOrder));
-  monthCosts.paymentFees = revenueGross*CONFIG.transaction.paymentFeePct + orders*CONFIG.transaction.paymentFeeFixed;
+  for(const key of activeMarketKeys()){
+    const demand = perMarketDemand[key];
+    const sold = Math.min(demand, remainingInventory);
+    remainingInventory -= sold;
+    totalUnitsSold += sold;
+    const mstate = state.markets[key];
+    const price = mstate.price || 0;
+    const revenue = sold*price;
+    const cogs = sold*state.avgUnitCost;
+    const vatRate = key==="hu" ? CONFIG.legal.vatRateHU : CONFIG.markets[key].vatRate;
+    const netRevenue = revenue/(1+vatRate);
+    const outputVat = revenue - netRevenue;
+    marketBreakdown[key] = { revenueGross: revenue, unitsSold: sold, cogs, vatOutput: outputVat, vatRate };
+    monthCosts.revenueGross += revenue;
+    monthCosts.cogs += cogs;
+  }
+  if(totalDemand > state.inventory){
+    log.push({type:"bad", text:`A teljes kereslet (${totalDemand} db) meghaladta a raktárkészletet (${state.inventory} db) — elmaradt bevétel a készlethiány miatt.`});
+  }
+  state.inventory -= totalUnitsSold;
+  monthCosts.unitsSold = totalUnitsSold;
+
+  monthCosts.packaging = totalUnitsSold*packaging.cost;
+  const orders = Math.max(0, Math.ceil(totalUnitsSold/CONFIG.transaction.avgUnitsPerOrder));
+  monthCosts.paymentFees = monthCosts.revenueGross*CONFIG.transaction.paymentFeePct + orders*CONFIG.transaction.paymentFeeFixed;
   monthCosts.courier = orders*CONFIG.transaction.courierFeePerOrder;
 
-  // visszaküldés / garancia
-  let returnRate = randRange(CONFIG.risk.returnRateMin, CONFIG.risk.returnRateMax);
-  let warrantyRate = randRange(CONFIG.risk.warrantyRateMin, CONFIG.risk.warrantyRateMax);
-  if(state.hasHelper){
-    returnRate *= (1-CONFIG.partTimeHelper.returnWarrantyReduction);
-    warrantyRate *= (1-CONFIG.partTimeHelper.returnWarrantyReduction);
+  let staffPenaltyApplies = false;
+  if(totalUnitsSold > CONFIG.employees.warehouseThresholdUnitsNoPenalty && warehouseStaffCapacity() < totalUnitsSold){
+    staffPenaltyApplies = true;
+    log.push({type:"bad", text:`A havi ${totalUnitsSold} db kiszolgálásához nem volt elég raktári kapacitásod (csomagolás/raktár alkalmazott) — ez megnövelte a hibaarányt.`});
   }
-  const returnedUnits = Math.round(unitsSold*returnRate);
-  const warrantyUnits = Math.round(unitsSold*warrantyRate);
-  const returnsLoss = returnedUnits*decision.price*0.9; // a visszatérített összeg nagy része, kis kezelési költséggel csökkentve
-  const warrantyLoss = warrantyUnits*state.avgUnitCost;
-  monthCosts.returnsLoss = returnsLoss;
-  monthCosts.warrantyLoss = warrantyLoss;
 
-  // kötelező járulék / szocho
-  let mandatory = 0;
+  let marketingTotal = 0;
+  for(const key of activeMarketKeys()){ marketingTotal += state.markets[key].marketing; }
+  monthCosts.marketing = marketingTotal;
+
+  let returnRate = randRange(CONFIG.risk.returnRateMin, CONFIG.risk.returnRateMax) * supportLossMultiplier();
+  let warrantyRate = randRange(CONFIG.risk.warrantyRateMin, CONFIG.risk.warrantyRateMax) * supportLossMultiplier();
+  if(staffPenaltyApplies){ returnRate += CONFIG.employees.noStaffDefectPenalty; }
+  const avgPrice = totalUnitsSold>0 ? monthCosts.revenueGross/totalUnitsSold : 0;
+  const returnedUnits = Math.round(totalUnitsSold*returnRate);
+  const warrantyUnits = Math.round(totalUnitsSold*warrantyRate);
+  monthCosts.returnsLoss = returnedUnits*avgPrice*0.9;
+  monthCosts.warrantyLoss = warrantyUnits*state.avgUnitCost;
+
   if(state.jobStatus === "fulltime"){
     const base = state.bizForm==="kft" ? CONFIG.legal.guaranteedMinWage : CONFIG.legal.minWage;
-    mandatory = Math.round(base*(CONFIG.legal.tbRate+CONFIG.legal.szochoRate));
+    monthCosts.mandatoryContribution = Math.round(base*(CONFIG.legal.tbRate+CONFIG.legal.szochoRate));
   }
-  monthCosts.mandatoryContribution = mandatory;
 
-  // ÁFA göngyölítés (negyedéves nettó befizetés)
-  const netRevenue = revenueGross/(1+CONFIG.legal.vatRate);
-  const outputVat = revenueGross - netRevenue;
-  const vatable = monthCosts.packaging+monthCosts.marketing+monthCosts.fixed+monthCosts.courier;
-  const inputVatDomestic = vatable*CONFIG.legal.vatRate/(1+CONFIG.legal.vatRate);
-  const inputVat = inputVatDomestic + monthCosts.importVatRecoverable;
-  state.quarter.outputVat += outputVat;
-  state.quarter.inputVat += inputVat;
-  state.quarter.hipaBase += (netRevenue - cogs);
+  const vatable = monthCosts.packaging+monthCosts.marketing+monthCosts.fixed+monthCosts.courier+monthCosts.teamCost;
+  const inputVatDomestic = vatable*CONFIG.legal.vatRateHU/(1+CONFIG.legal.vatRateHU);
+  for(const key of activeMarketKeys()){
+    state.quarter.outputVat[key] = (state.quarter.outputVat[key]||0) + (marketBreakdown[key]?.vatOutput||0);
+  }
+  state.quarter.inputVat += inputVatDomestic;
+  state.quarter.hipaBase += (monthCosts.revenueGross/(1+CONFIG.legal.vatRateHU) - monthCosts.cogs);
 
-  // átalányadó (EV) — éves göngyölített nettó árbevétel a küszöbhöz
-  let incomeTax = 0, corpTax = 0;
+  let incomeTax = 0;
+  const totalNetRevenueThisMonth = Object.keys(marketBreakdown).reduce((a,k)=>a + marketBreakdown[k].revenueGross/(1+marketBreakdown[k].vatRate), 0);
   if(state.bizForm === "ev"){
-    const yearMonthIdx = ((month-1) % 12); // 0=év eleje
-    if(yearMonthIdx===0) state.annualNetRevenue = 0;
-    const before = state.annualNetRevenue;
-    state.annualNetRevenue += netRevenue;
+    const yearMonthIdx = ((month-1) % 12);
+    if(yearMonthIdx===0) state.annualNetRevenueTotal = 0;
+    const before = state.annualNetRevenueTotal;
+    state.annualNetRevenueTotal += totalNetRevenueThisMonth;
     const threshold = CONFIG.legal.ataloonyTaxFreeAnnualRevenue;
     const excessBefore = Math.max(0, before-threshold);
-    const excessAfter = Math.max(0, state.annualNetRevenue-threshold);
+    const excessAfter = Math.max(0, state.annualNetRevenueTotal-threshold);
     const newlyTaxedRevenue = excessAfter-excessBefore;
-    if(newlyTaxedRevenue>0){
-      const taxableIncome = newlyTaxedRevenue*CONFIG.legal.ataloonyIncomeRatio;
-      incomeTax = taxableIncome*CONFIG.legal.szjaRate;
-    }
+    if(newlyTaxedRevenue>0){ incomeTax = newlyTaxedRevenue*CONFIG.legal.ataloonyIncomeRatio*CONFIG.legal.szjaRate; }
   } else {
-    // Kft: havi számviteli eredmény alapján negyedévente elszámolt TAO
-    const monthProfitBeforeTax = revenueGross - cogs - monthCosts.packaging - monthCosts.marketing - monthCosts.fixed
-      - mandatory - returnsLoss - warrantyLoss - monthCosts.customsDuty - monthCosts.paymentFees - monthCosts.courier;
-    if(monthProfitBeforeTax>0){
-      state.quarter.corpProfitAccrued += monthProfitBeforeTax;
-    }
+    const monthProfitBeforeTax = monthCosts.revenueGross - monthCosts.cogs - monthCosts.packaging - monthCosts.marketing
+      - monthCosts.fixed - monthCosts.teamCost - monthCosts.marketMaintenance - monthCosts.mandatoryContribution
+      - monthCosts.returnsLoss - monthCosts.warrantyLoss - monthCosts.customsDuty - monthCosts.paymentFees - monthCosts.courier;
+    if(monthProfitBeforeTax>0) state.quarter.corpProfitAccrued += monthProfitBeforeTax;
   }
   monthCosts.incomeTaxPayable = incomeTax;
   state.cash -= incomeTax;
@@ -849,65 +1028,72 @@ function runMonth(decision){
   const isQuarterEnd = (month % 3 === 0);
   let vatPaidThisMonth = 0, hipaPaidThisMonth = 0, corpTaxPaidThisMonth = 0;
   if(isQuarterEnd){
-    const vatNet = state.quarter.outputVat - state.quarter.inputVat;
-    vatPaidThisMonth = vatNet; // lehet negatív is (visszaigénylés, készpénz-bevétel)
+    const totalOutputVat = Object.values(state.quarter.outputVat).reduce((a,b)=>a+b,0);
+    vatPaidThisMonth = totalOutputVat - state.quarter.inputVat;
     state.cash -= vatPaidThisMonth;
     const hipa = Math.max(0, state.quarter.hipaBase)*CONFIG.legal.hipaRateDefault;
     hipaPaidThisMonth = hipa;
     state.cash -= hipaPaidThisMonth;
     if(state.bizForm==="kft"){
-      corpTaxPaidThisMonth = state.quarter.corpProfitAccrued*CONFIG.kft.corporateTaxRate;
+      corpTaxPaidThisMonth = state.quarter.corpProfitAccrued*CONFIG.legal.taoRate;
       state.cash -= corpTaxPaidThisMonth;
     }
-    state.quarter = { outputVat:0, inputVat:0, hipaBase:0, corpProfitAccrued:0 };
+    state.quarter = { outputVat: {}, inputVat: 0, hipaBase: 0, corpProfitAccrued: 0 };
   }
   monthCosts.vatPayable = vatPaidThisMonth;
   monthCosts.hipaPayable = hipaPaidThisMonth;
   monthCosts.corpTaxPayable = corpTaxPaidThisMonth;
 
-  // bővülés (egyszeri költség, ha most vásárolta)
-  monthCosts.expansionCost = decision.expansionCostThisMonth||0;
+  const ipLevel = ipProtectionLevel();
+  const annualChance = CONFIG.risk.copycatAnnualChance[ipLevel];
+  if(Math.random() < annualChance/12){
+    const loss = randRange(CONFIG.risk.copycatAwarenessLossMin, CONFIG.risk.copycatAwarenessLossMax);
+    state.markets.hu.awareness = clamp(state.markets.hu.awareness - loss, 0, 100);
+    log.push({type:"bad", text:`Valaki lemásolta / hasonló néven kezdte árulni a termékedet — ez ${Math.round(loss)} pontot ártott a hazai márkaismertségednek.${ipLevel==="none" ? " Védjegybejelentéssel csökkenthető lett volna a kockázat." : ""}`});
+  }
 
-  // cash mozgás a "működési" tételekre
-  // (a COGS nem külön cash tétel: a beszerzés cash-flow-ja már a rendelésnél/érkezéskor
-  // lezajlott az előleg/végösszeg/vám kifizetésekor — itt csak az eredménykimutatásban szerepel)
-  state.cash += revenueGross;
+  state.cash += monthCosts.revenueGross;
   state.cash -= monthCosts.packaging;
   state.cash -= monthCosts.marketing;
   state.cash -= monthCosts.paymentFees;
   state.cash -= monthCosts.courier;
   state.cash -= monthCosts.fixed;
+  state.cash -= monthCosts.teamCost;
+  state.cash -= monthCosts.marketMaintenance;
+  state.cash -= monthCosts.websiteMaintenance;
   state.cash -= monthCosts.mandatoryContribution;
   state.cash -= monthCosts.returnsLoss;
   state.cash -= monthCosts.warrantyLoss;
   state.cash -= monthCosts.expansionCost;
 
-  // eredmény (számviteli profit, adók után)
-  const monthProfit = revenueGross - cogs - monthCosts.packaging - monthCosts.marketing - monthCosts.paymentFees
-    - monthCosts.courier - monthCosts.fixed - monthCosts.mandatoryContribution - monthCosts.returnsLoss
-    - monthCosts.warrantyLoss - monthCosts.customsDuty - incomeTax - vatPaidThisMonth - hipaPaidThisMonth
-    - corpTaxPaidThisMonth - monthCosts.expansionCost;
+  const monthProfit = monthCosts.revenueGross - monthCosts.cogs - monthCosts.packaging - monthCosts.marketing - monthCosts.paymentFees
+    - monthCosts.courier - monthCosts.fixed - monthCosts.teamCost - monthCosts.marketMaintenance - monthCosts.websiteMaintenance
+    - monthCosts.mandatoryContribution - monthCosts.returnsLoss - monthCosts.warrantyLoss - monthCosts.customsDuty
+    - incomeTax - vatPaidThisMonth - hipaPaidThisMonth - corpTaxPaidThisMonth - monthCosts.expansionCost;
   state.cumulativeProfit += monthProfit;
   monthCosts.monthProfit = monthProfit;
+  monthCosts.closingCash = state.cash;
+  monthCosts.marketBreakdown = marketBreakdown;
 
-  // brand awareness frissítés (játékos)
   const distCfg = CONFIG.distribution[decision.distribution];
-  let growth = Math.sqrt(Math.max(0,decision.marketing)/CONFIG.market.marketingRefSpend) * (1-state.awareness/100) * 8;
-  growth *= (1+distCfg.awarenessBonus);
-  if(decision.position > distCfg.luxuryPenaltyAbovePos) growth *= 0.5;
-  let decay = decision.marketing<=0 ? CONFIG.market.awarenessDecayNoMarketing : 0;
-  if(posJump > CONFIG.market.awarenessBigJumpThreshold){
-    growth *= 0.4;
-    decay += posJump*0.15;
-    log.push({type:"bad", text:`Nagy pozícióváltás (${state.prevPosition} → ${decision.position}) összezavarja a márkaképet — visszaesik az ismertség-növekedés.`});
+  for(const key of activeMarketKeys()){
+    const mstate = state.markets[key];
+    const cmBonus = countryManagerBonus(key);
+    let growth = Math.sqrt(Math.max(0, mstate.marketing*marketingEffMultiplier())/CONFIG.market.marketingRefSpend) * (1-mstate.awareness/100) * CONFIG.market.awarenessGrowthK;
+    growth *= (1+distCfg.awarenessBonus) * (1+cmBonus);
+    if(decision.position > distCfg.luxuryPenaltyAbovePos) growth *= 0.5;
+    let decay = mstate.marketing<=0 ? CONFIG.market.awarenessDecayNoMarketing : 0;
+    if(key==="hu" && posJump > CONFIG.market.awarenessBigJumpThreshold){ growth *= 0.4; decay += posJump*0.15; }
+    mstate.awareness = clamp(mstate.awareness + growth - decay, 0, 100);
   }
-  state.awareness = clamp(state.awareness+growth-decay, 0, 100);
+  if(posJump > CONFIG.market.awarenessBigJumpThreshold){
+    log.push({type:"bad", text:`Nagy pozícióváltás (${state.prevPosition} → ${decision.position}) összezavarja a márkaképet minden piacon — visszaesik az ismertség-növekedés.`});
+  }
   state.prevPosition = decision.position;
   state.position = decision.position;
 
-  // versenytársak frissítése (fix stratégia, de a piaci allokáció dinamikus)
   for(const c of state.competitors){
-    const alloc = allocations[c.key];
+    const alloc = huAlloc[c.key];
     const cUnits = Math.round(alloc.units);
     const cRevenue = cUnits*c.price;
     const cCogs = cRevenue*c.cogsRatio;
@@ -921,37 +1107,24 @@ function runMonth(decision){
     c.history.awareness.push(c.awareness);
   }
 
-  // csőd-ellenőrzés
-  if(state.cash < CONFIG.bankruptcy.cashThreshold){
-    state.consecutiveNegativeCash++;
-  } else {
-    state.consecutiveNegativeCash = 0;
-  }
-  if(state.consecutiveNegativeCash >= CONFIG.bankruptcy.consecutiveMonthsAllowed){
-    state.bankrupt = true;
-    state.bankruptMonth = month;
-  }
+  if(state.cash < CONFIG.bankruptcy.cashThreshold){ state.consecutiveNegativeCash++; } else { state.consecutiveNegativeCash = 0; }
+  if(state.consecutiveNegativeCash >= CONFIG.bankruptcy.consecutiveMonthsAllowed){ state.bankrupt = true; state.bankruptMonth = month; }
 
-  // szezon / pozicionálási visszajelzés
   log.unshift({type:"info", text: seasonLabel(month)});
   const nearest = state.competitors.slice().sort((a,b)=>Math.abs(a.position-decision.position)-Math.abs(b.position-decision.position))[0];
   const dist = Math.abs(nearest.position-decision.position);
-  if(dist < 12){
-    log.push({type:"info", text:`Közel pozicionáltad magad a(z) „${nearest.name}” márkához (távolság: ${dist} pont) — erős a verseny, lassabb az awareness-növekedés ezen a zónán.`});
-  } else if(dist > 25){
-    log.push({type:"good", text:`Viszonylag üres piaci résbe pozicionáltad magad (legközelebbi versenytárs: „${nearest.name}”, ${dist} pont távolságra) — könnyebb a növekedés.`});
-  }
-  if(unitsSold===0 && state.inventory===0 && demandUnits>0){
-    log.push({type:"bad", text:"Nem volt eladható készleted, pedig lett volna rá kereslet — rendelj időben!"});
-  }
+  if(dist < 12) log.push({type:"info", text:`Közel pozicionáltad magad a(z) „${nearest.name}” márkához (${dist} pont) — erős a verseny, lassabb az awareness-növekedés.`});
+  else if(dist > 25) log.push({type:"good", text:`Viszonylag üres piaci résbe pozicionáltad magad (legközelebbi versenytárs: „${nearest.name}”, ${dist} pont) — könnyebb a növekedés.`});
 
   state.history.cash.push(state.cash);
   state.history.profit.push(state.cumulativeProfit);
-  state.history.awareness.push(state.awareness);
+  state.history.teamSize.push(state.employees.length);
   state.history.months.push(month);
+  for(const key of Object.keys(state.history.marketAwareness)){
+    state.history.marketAwareness[key].push(state.markets[key].active ? state.markets[key].awareness : null);
+  }
 
-  monthCosts.closingCash = state.cash;
-  state.lastMonthResult = { monthCosts, log, allocations };
+  state.lastMonthResult = { monthCosts, log };
   state.monthlyRecords.push({ month, log, monthCosts });
   return { monthCosts, log };
 }
@@ -963,17 +1136,15 @@ const gameScreen = document.getElementById("game-screen");
 const endScreen = document.getElementById("end-screen");
 const kftWarning = document.getElementById("kft-warning");
 
-document.querySelectorAll('input[name="bizform"]').forEach(r=>{
-  r.addEventListener("change", updateKftWarning);
-});
+document.querySelectorAll('input[name="bizform"]').forEach(r=> r.addEventListener("change", updateKftWarning));
 function updateKftWarning(){
   const val = document.querySelector('input[name="bizform"]:checked').value;
   if(val==="kft"){
     const needed = CONFIG.kft.minTorzstoke + CONFIG.kft.foundingCostMin;
     kftWarning.hidden = false;
     kftWarning.innerHTML = `<strong>Figyelem:</strong> a Kft. alapításához minimum ${ft(CONFIG.kft.minTorzstoke)} törzstőke és kb. ${ft(CONFIG.kft.foundingCostMin)}–${ft(CONFIG.kft.foundingCostMax)} alapítási költség szükséges (összesen kb. ${ft(needed)}+). Az induló tőkéd (${ft(CONFIG.startingCash)}) ehhez önmagában nem elég.
-      A szimuláció ezt úgy kezeli, hogy a törzstőkét külön biztosítottnak tekinti, és csak az alapítási költséget vonja le az induló kasszádból — így csökkentett induló készpénzzel indulsz (kb. ${ft(CONFIG.startingCash-CONFIG.kft.foundingCostMax)}–${ft(CONFIG.startingCash-CONFIG.kft.foundingCostMin)}).
-      Ha ezt nem szeretnéd, válaszd inkább az egyéni vállalkozói formát.`;
+      A szimuláció ezt úgy kezeli, hogy a törzstőkét külön biztosítottnak tekinti (ez "lekötött" tőkeként jelenik meg, nem költhető el), és csak az alapítási költséget vonja le az induló kasszádból.
+      Ha ezt nem szeretnéd, válaszd inkább az egyéni vállalkozói formát — Kft-re a játék során később, elég tőke birtokában bármikor átválthatsz.`;
   } else {
     kftWarning.hidden = true;
   }
@@ -982,119 +1153,376 @@ function updateKftWarning(){
 document.getElementById("btn-start").addEventListener("click", ()=>{
   const bizForm = document.querySelector('input[name="bizform"]:checked').value;
   const jobStatus = document.querySelector('input[name="jobstatus"]:checked').value;
-  initState(bizForm, jobStatus);
+  const gameLength = Number(document.querySelector('input[name="gamelength"]:checked').value);
+  initState(bizForm, jobStatus, gameLength);
   state.selectedQualityId = "kozepes";
   state.selectedPackagingId = "kozepes";
   setupScreen.hidden = true;
   gameScreen.hidden = false;
   buildDecisionPanelOptions();
   prefillDecisionPanel();
+  buildWorldMap();
   initCharts();
   renderAll();
 });
 
 // ============================= UI: DÖNTÉSI PANEL =============================
 
-const inPrice = document.getElementById("in-price");
 const inQuality = document.getElementById("in-quality");
+const inSupplier = document.getElementById("in-supplier");
 const inPackaging = document.getElementById("in-packaging");
-const inMarketing = document.getElementById("in-marketing");
 const inPosition = document.getElementById("in-position");
 const positionValue = document.getElementById("position-value");
 const inDistribution = document.getElementById("in-distribution");
 const inOrder = document.getElementById("in-order");
 const orderHint = document.getElementById("order-hint");
+const inQa = document.getElementById("in-qa");
+const qaCostLabel = document.getElementById("qa-cost-label");
 const expansionControls = document.getElementById("expansion-controls");
+const marketDecisionRows = document.getElementById("market-decision-rows");
 
 function buildDecisionPanelOptions(){
   inQuality.innerHTML = CONFIG.qualityTiers.map(q=>`<option value="${q.id}">${q.label}</option>`).join("");
   inPackaging.innerHTML = CONFIG.packagingTiers.map(p=>`<option value="${p.id}">${p.label}</option>`).join("");
+  inSupplier.innerHTML = CONFIG.suppliers.map(s=>`<option value="${s.id}">${s.label}</option>`).join("");
+  qaCostLabel.textContent = `${ft(CONFIG.oneTime.qaInspection.min)}–${ft(CONFIG.oneTime.qaInspection.max)}`;
 }
 function prefillDecisionPanel(){
-  inPrice.value = 24990;
   inQuality.value = "kozepes";
   inPackaging.value = "kozepes";
-  inMarketing.value = 80000;
+  inSupplier.value = state.selectedSupplierId;
   inPosition.value = state.position;
   positionValue.textContent = state.position;
   inDistribution.value = "mass";
   inOrder.value = 200;
+  renderMarketDecisionRows();
   renderExpansionControls();
   renderOrderHint();
+  renderSupplierHint();
+  renderTeamPanel();
 }
 inPosition.addEventListener("input", ()=>{ positionValue.textContent = inPosition.value; renderPositionMap(); });
 inOrder.addEventListener("input", renderOrderHint);
+inSupplier.addEventListener("change", renderSupplierHint);
 
 function renderOrderHint(){
   const capLeft = Math.max(0, warehouseCapacity()-state.inventory-incomingUnits());
-  orderHint.textContent = `Raktárkapacitás: ${warehouseCapacity()} db (jelenlegi készlet: ${state.inventory} db, úton lévő: ${incomingUnits()} db, szabad: ${capLeft} db).`;
+  orderHint.textContent = `Raktárkapacitás: ${warehouseCapacity()} db (készlet: ${state.inventory} db, úton: ${incomingUnits()} db, szabad: ${capLeft} db).`;
+}
+function renderSupplierHint(){
+  const s = CONFIG.suppliers.find(x=>x.id===inSupplier.value);
+  let hint = `Selejtarány: ${Math.round(s.defectMin*100)}–${Math.round(s.defectMax*100)}%.`;
+  if(inSupplier.value !== state.selectedSupplierId){
+    hint += ` Váltás egyszeri díja: ${ft(CONFIG.supplierSwitch.cost)}, ${CONFIG.supplierSwitch.transitionMonths} hónapig magasabb selejtaránnyal jár az átállás.`;
+  }
+  if(state.pendingSupplierIncrease){
+    hint += ` Bejelentett áremelés: +${Math.round(state.pendingSupplierIncrease.pct*100)}% a(z) ${state.pendingSupplierIncrease.effectiveFromMonth}. hónaptól.`;
+  }
+  document.getElementById("supplier-hint").textContent = hint;
+}
+
+function renderMarketDecisionRows(){
+  marketDecisionRows.innerHTML = "";
+  for(const key of activeMarketKeys()){
+    const cfg = key==="hu" ? {name:"Magyarország (hazai piac)"} : CONFIG.markets[key];
+    const mstate = state.markets[key];
+    const row = document.createElement("div");
+    row.className = "market-row";
+    row.innerHTML = `
+      <div class="mname">${cfg.name}</div>
+      <div><label>Ár (Ft/db)</label><input type="number" step="500" min="1000" class="mkt-price" data-market="${key}" value="${mstate.price ?? 24990}"></div>
+      <div><label>Marketing (Ft/hó)</label><input type="number" step="5000" min="0" class="mkt-marketing" data-market="${key}" value="${mstate.marketing ?? 0}"></div>
+    `;
+    marketDecisionRows.appendChild(row);
+  }
 }
 
 function renderExpansionControls(){
   expansionControls.innerHTML = "";
-  if(!state.warehouseExternal){
-    const canAfford = state.cash > CONFIG.warehouse.externalRent*2;
-    const div = document.createElement("div");
-    div.className = "col";
-    div.innerHTML = `<button class="btn secondary" id="btn-buy-warehouse" ${canAfford?"":"disabled"}>Külső raktár bérlése (+${CONFIG.warehouse.externalCapacityBonus} db kapacitás, ${ft(CONFIG.warehouse.externalRent)}/hó)</button>`;
-    expansionControls.appendChild(div);
+  const add = (html)=>{ const d=document.createElement("div"); d.className="col"; d.innerHTML=html; expansionControls.appendChild(d); return d; };
+
+  if(!state.warehouseOwned){
+    if(!state.warehouseExternal){
+      const canAfford = state.cash > CONFIG.warehouse.externalRent*2;
+      add(`<button class="btn secondary" id="btn-buy-warehouse" ${canAfford?"":"disabled"}>Külső raktár bérlése (+${CONFIG.warehouse.externalCapacityBonus} db, ${ft(CONFIG.warehouse.externalRent)}/hó)</button>`);
+    }
+    const canAffordOwn = state.cash > CONFIG.warehouse.ownedPurchaseCost*1.2;
+    add(`<button class="btn secondary" id="btn-own-warehouse" ${canAffordOwn?"":"disabled"}>Saját raktár vásárlása (+${CONFIG.warehouse.ownedCapacityBonus} db, egyszeri ${ft(CONFIG.warehouse.ownedPurchaseCost)}, ${ft(CONFIG.warehouse.ownedMaintenance)}/hó fenntartás)</button>`);
   } else {
-    const div = document.createElement("div");
-    div.className = "col small muted";
-    div.textContent = `✓ Külső raktár aktív (+${CONFIG.warehouse.externalCapacityBonus} db kapacitás, ${ft(CONFIG.warehouse.externalRent)}/hó)`;
-    expansionControls.appendChild(div);
+    add(`<div class="small muted">✓ Saját raktár (+${CONFIG.warehouse.ownedCapacityBonus} db kapacitás)</div>`);
   }
-  if(!state.hasHelper){
-    const cost = Math.round(CONFIG.partTimeHelper.grossWage*(1+CONFIG.partTimeHelper.employerSzochoRate));
-    const canAfford = state.cash > cost*2;
-    const div = document.createElement("div");
-    div.className = "col";
-    div.innerHTML = `<button class="btn secondary" id="btn-hire-helper" ${canAfford?"":"disabled"}>Részmunkaidős segítség felvétele (${ft(cost)}/hó, kevesebb visszaküldés/garancia)</button>`;
-    expansionControls.appendChild(div);
+
+  if(!state.hasInsurance){
+    const can = state.cash >= CONFIG.fixedCosts.insurance.monthly*2;
+    add(`<button class="btn secondary" id="btn-insurance" ${can?"":"disabled"}>Termékfelelősség-biztosítás kötése (${ft(CONFIG.fixedCosts.insurance.monthly)}/hó)</button>`);
   } else {
-    const div = document.createElement("div");
-    div.className = "col small muted";
-    div.textContent = "✓ Részmunkaidős segítség alkalmazásban";
-    expansionControls.appendChild(div);
+    add(`<div class="small muted">✓ Termékfelelősség-biztosítás aktív</div>`);
   }
-  const btnW = document.getElementById("btn-buy-warehouse");
-  if(btnW) btnW.addEventListener("click", ()=>{ state.warehouseExternal = true; renderExpansionControls(); renderOrderHint(); renderAll(); });
-  const btnH = document.getElementById("btn-hire-helper");
-  if(btnH) btnH.addEventListener("click", ()=>{ state.hasHelper = true; renderExpansionControls(); renderAll(); });
+
+  if(!state.website.tier){
+    const canBasic = state.cash >= CONFIG.oneTime.website.basic.cost;
+    const canCustom = state.cash >= CONFIG.oneTime.website.custom.cost;
+    add(`<button class="btn secondary" id="btn-website-basic" ${canBasic?"":"disabled"}>${CONFIG.oneTime.website.basic.label}</button>`);
+    add(`<button class="btn secondary" id="btn-website-custom" ${canCustom?"":"disabled"}>${CONFIG.oneTime.website.custom.label}</button>`);
+  } else {
+    add(`<div class="small muted">✓ Webshop: ${state.website.tier==="basic"?"sablon alapú":"egyedi fejlesztésű"}</div>`);
+  }
+
+  if(!state.ipProtection.trademarkHU){
+    const can = state.cash >= CONFIG.oneTime.trademarkHU;
+    add(`<button class="btn secondary" id="btn-trademark-hu" ${can?"":"disabled"}>Magyar védjegybejelentés (SZTNH, ${ft(CONFIG.oneTime.trademarkHU)})</button>`);
+  } else { add(`<div class="small muted">✓ Magyar védjegy bejelentve</div>`); }
+  if(state.ipProtection.trademarkHU && !state.ipProtection.trademarkEU){
+    const can = state.cash >= CONFIG.oneTime.trademarkEU.min;
+    add(`<button class="btn secondary" id="btn-trademark-eu" ${can?"":"disabled"}>EU védjegybejelentés (EUIPO, ${ft(CONFIG.oneTime.trademarkEU.min)}–${ft(CONFIG.oneTime.trademarkEU.max)})</button>`);
+  } else if(state.ipProtection.trademarkEU){ add(`<div class="small muted">✓ EU védjegy bejelentve</div>`); }
+  if(!state.ipProtection.designProtection){
+    const can = state.cash >= CONFIG.oneTime.designProtection.min;
+    add(`<button class="btn secondary" id="btn-design-protection" ${can?"":"disabled"}>Formatervezési mintaoltalom (${ft(CONFIG.oneTime.designProtection.min)}–${ft(CONFIG.oneTime.designProtection.max)})</button>`);
+  } else { add(`<div class="small muted">✓ Formatervezési mintaoltalom bejelentve</div>`); }
+
+  if(state.bizForm === "ev"){
+    const can = state.cash >= CONFIG.kft.midGameConversion.minCashRequired;
+    add(`<button class="btn secondary" id="btn-convert-kft" ${can?"":"disabled"}>Átváltás Kft-re (törzstőke ${ft(CONFIG.kft.minTorzstoke)} lekötve + kb. ${ft(CONFIG.kft.midGameConversion.legalCostMin)}–${ft(CONFIG.kft.midGameConversion.legalCostMax)} jogi költség)</button>`);
+  }
+
+  const bind = (id, fn)=>{ const el=document.getElementById(id); if(el) el.addEventListener("click", fn); };
+  bind("btn-buy-warehouse", ()=>{ state.warehouseExternal=true; renderExpansionControls(); renderOrderHint(); renderAll(); });
+  bind("btn-own-warehouse", ()=>{ state.cash -= CONFIG.warehouse.ownedPurchaseCost; state.warehouseOwned=true; state.warehouseExternal=false; state.pendingExpansionCost += CONFIG.warehouse.ownedPurchaseCost; renderExpansionControls(); renderOrderHint(); renderAll(); });
+  bind("btn-insurance", ()=>{ state.hasInsurance=true; renderExpansionControls(); renderAll(); });
+  bind("btn-website-basic", ()=>{ state.cash -= CONFIG.oneTime.website.basic.cost; state.website.tier="basic"; renderExpansionControls(); renderAll(); });
+  bind("btn-website-custom", ()=>{ state.cash -= CONFIG.oneTime.website.custom.cost; state.website.tier="custom"; renderExpansionControls(); renderAll(); });
+  bind("btn-trademark-hu", ()=>{ state.cash -= CONFIG.oneTime.trademarkHU; state.ipProtection.trademarkHU=true; renderExpansionControls(); renderAll(); });
+  bind("btn-trademark-eu", ()=>{ const c=roundTo(randRange(CONFIG.oneTime.trademarkEU.min,CONFIG.oneTime.trademarkEU.max),5000); state.cash -= c; state.ipProtection.trademarkEU=true; renderExpansionControls(); renderAll(); });
+  bind("btn-design-protection", ()=>{ const c=roundTo(randRange(CONFIG.oneTime.designProtection.min,CONFIG.oneTime.designProtection.max),5000); state.cash -= c; state.ipProtection.designProtection=true; renderExpansionControls(); renderAll(); });
+  bind("btn-convert-kft", ()=>{
+    const legalCost = roundTo(randRange(CONFIG.kft.midGameConversion.legalCostMin, CONFIG.kft.midGameConversion.legalCostMax), 5000);
+    state.cash -= legalCost;
+    state.lockedCapital += CONFIG.kft.minTorzstoke;
+    state.bizForm = "kft";
+    renderExpansionControls(); renderAll();
+  });
 }
 
+// ============================= VILÁGTÉRKÉP =============================
+
+const REGION_LAYOUT = {
+  us: { x: 20, y: 130, w: 190, h: 150 },
+  uk: { x: 340, y: 30, w: 100, h: 75 },
+  de: { x: 460, y: 30, w: 150, h: 80 },
+  v4: { x: 460, y: 125, w: 150, h: 110 },
+  ro: { x: 630, y: 130, w: 120, h: 105 },
+};
+
+function buildWorldMap(){
+  const svg = document.getElementById("worldmap");
+  svg.innerHTML = "";
+  const ns = "http://www.w3.org/2000/svg";
+  for(const key of Object.keys(REGION_LAYOUT)){
+    const pos = REGION_LAYOUT[key];
+    const cfg = CONFIG.markets[key];
+    const g = document.createElementNS(ns, "g");
+    g.setAttribute("class", "region");
+    g.setAttribute("data-market", key);
+    const rect = document.createElementNS(ns, "rect");
+    rect.setAttribute("x", pos.x); rect.setAttribute("y", pos.y);
+    rect.setAttribute("width", pos.w); rect.setAttribute("height", pos.h);
+    rect.setAttribute("rx", 10);
+    g.appendChild(rect);
+    const text = document.createElementNS(ns, "text");
+    text.setAttribute("x", pos.x+pos.w/2); text.setAttribute("y", pos.y+pos.h/2-2);
+    text.setAttribute("text-anchor", "middle");
+    text.textContent = cfg.name;
+    g.appendChild(text);
+    const sub = document.createElementNS(ns, "text");
+    sub.setAttribute("class", "sub");
+    sub.setAttribute("x", pos.x+pos.w/2); sub.setAttribute("y", pos.y+pos.h/2+14);
+    sub.setAttribute("text-anchor", "middle");
+    sub.textContent = cfg.requiresKft ? "csak Kft" : "";
+    g.appendChild(sub);
+    g.addEventListener("click", ()=> selectMarket(key));
+    svg.appendChild(g);
+  }
+  const home = document.createElementNS(ns, "text");
+  home.setAttribute("x", 535); home.setAttribute("y", 118);
+  home.setAttribute("text-anchor", "middle");
+  home.setAttribute("font-size", "11");
+  home.setAttribute("fill", "var(--muted)");
+  home.textContent = "🏠 Magyarország (székhely)";
+  svg.appendChild(home);
+  updateWorldMapStyles();
+}
+
+function updateWorldMapStyles(){
+  document.querySelectorAll("#worldmap .region").forEach(g=>{
+    const key = g.dataset.market;
+    g.classList.toggle("active", state.markets[key].active);
+    g.classList.toggle("locked", CONFIG.markets[key].requiresKft && state.bizForm!=="kft" && !state.markets[key].active);
+  });
+}
+
+let selectedMarketKey = null;
+function selectMarket(key){
+  selectedMarketKey = key;
+  const cfg = CONFIG.markets[key];
+  const mstate = state.markets[key];
+  const panel = document.getElementById("market-info");
+  const canEnter = !mstate.active && (!cfg.requiresKft || state.bizForm==="kft") && state.cash >= mstate.entryCost;
+  const lockedReason = mstate.active ? null : (cfg.requiresKft && state.bizForm!=="kft") ? "Ehhez a piachoz Kft. forma szükséges." :
+    (state.cash < mstate.entryCost) ? "Nincs elég készpénzed a piacra lépési költséghez." : null;
+  panel.innerHTML = `
+    <h3 style="margin-top:0;">${cfg.name}</h3>
+    <dl>
+      <dt>Piacméret (a hazai piachoz képest)</dt><dd>${Math.round(cfg.sizeFactor*100)}%</dd>
+      <dt>Piacra lépési egyszeri költség</dt><dd>${ft(mstate.entryCost)}</dd>
+      <dt>Helyi ÁFA</dt><dd>${Math.round(cfg.vatRate*100)}% <span class="muted small">(${cfg.vatNote})</span></dd>
+      <dt>Vámhelyzet</dt><dd>${cfg.customs ? `Van vámhatár (becsült vám: ${Math.round((cfg.dutyRatePct||0)*100)}%)` : "Nincs vámhatár (EU belső piac)"}</dd>
+      <dt>Havi fenntartási többletköltség</dt><dd>${ft(cfg.maintenanceExtra)}</dd>
+    </dl>
+    <div class="procon"><span class="pro">+ ${cfg.pro}</span><br><span class="con">− ${cfg.con}</span></div>
+    ${mstate.active ? '<p class="small" style="margin-top:10px;"><strong>Már aktív piac.</strong></p>' :
+      `<div class="btn-row" style="margin-top:10px;"><button class="btn" id="btn-enter-market" ${canEnter?"":"disabled"}>Piacra lépés</button></div>
+       ${lockedReason ? `<p class="lock-note">${lockedReason}</p>` : ""}`}
+  `;
+  const btn = document.getElementById("btn-enter-market");
+  if(btn) btn.addEventListener("click", ()=>{
+    state.cash -= mstate.entryCost;
+    mstate.active = true;
+    mstate.price = Math.round(idealPriceForPosition(state.position) * cfg.idealPriceFactor);
+    mstate.marketing = 0;
+    mstate.entryMonth = state.month;
+    renderMarketDecisionRows();
+    updateWorldMapStyles();
+    selectMarket(key);
+    renderAll();
+  });
+}
+
+// ============================= CSAPAT UI =============================
+
+function renderTeamPanel(){
+  const wrap = document.getElementById("team-panel");
+  let html = `<table class="team"><thead><tr><th>Szerepkör</th><th>Idő</th><th>Piac</th><th class="num">Havi költség</th><th></th></tr></thead><tbody>`;
+  if(state.employees.length===0){
+    html += `<tr><td colspan="5" class="muted small">Még nincs alkalmazottad.</td></tr>`;
+  }
+  for(const e of state.employees){
+    const roleCfg = CONFIG.employees.roles[e.role];
+    const marketName = e.market ? (CONFIG.markets[e.market]?.name || e.market) : "—";
+    html += `<tr><td>${roleCfg.label}</td><td>${e.fullTime?"teljes":"rész"}</td><td>${marketName}</td>
+      <td class="num">${ft(employeeMonthlyCost(e))}</td>
+      <td><button class="btn tiny danger" data-fire="${e.id}">Elbocsát</button></td></tr>`;
+  }
+  html += `</tbody></table>
+    <div class="btn-row" style="margin-top:10px;"><button class="btn secondary tiny" id="btn-open-hire">+ Felvétel</button></div>
+    <p class="small muted" style="margin-top:6px;">Csapatlétszám: ${state.employees.length} fő · Havi teljes bérköltség: ${ft(totalTeamCost())}</p>`;
+  wrap.innerHTML = html;
+  wrap.querySelectorAll("[data-fire]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{ fireEmployee(Number(btn.dataset.fire)); renderTeamPanel(); renderAll(); });
+  });
+  document.getElementById("btn-open-hire").addEventListener("click", openHireModal);
+}
+
+function openHireModal(){
+  const form = document.getElementById("hire-form");
+  const roleOptions = Object.keys(CONFIG.employees.roles).map(r=>`<option value="${r}">${CONFIG.employees.roles[r].label}</option>`).join("");
+  form.innerHTML = `
+    <div class="field"><label for="hire-role">Szerepkör</label><select id="hire-role">${roleOptions}</select></div>
+    <div class="field" id="hire-fulltime-wrap"><label><input type="checkbox" id="hire-fulltime" checked> Teljes munkaidő (kikapcsolva: részmunkaidő)</label></div>
+    <div class="field" id="hire-market-wrap" hidden><label for="hire-market">Melyik piachoz?</label><select id="hire-market"></select></div>
+    <p class="small muted" id="hire-wage-hint"></p>
+    <div class="btn-row"><button class="btn" id="btn-confirm-hire">Felvétel</button></div>
+  `;
+  const roleSelect = document.getElementById("hire-role");
+  const fullTimeCheck = document.getElementById("hire-fulltime");
+  const marketWrap = document.getElementById("hire-market-wrap");
+  const marketSelect = document.getElementById("hire-market");
+  const wageHint = document.getElementById("hire-wage-hint");
+  const fullTimeWrap = document.getElementById("hire-fulltime-wrap");
+
+  function refresh(){
+    const role = roleSelect.value;
+    const cfg = CONFIG.employees.roles[role];
+    const onlyFull = (role==="marketing" || role==="designer" || role==="country_manager");
+    fullTimeWrap.hidden = onlyFull;
+    if(onlyFull) fullTimeCheck.checked = true;
+    marketWrap.hidden = role !== "country_manager";
+    if(role==="country_manager"){
+      const opts = activeMarketKeys().filter(k=>k!=="hu" && !state.employees.some(e=>e.role==="country_manager"&&e.market===k));
+      marketSelect.innerHTML = opts.map(k=>`<option value="${k}">${CONFIG.markets[k].name}</option>`).join("") || `<option value="">Nincs elérhető piac</option>`;
+    }
+    wageHint.textContent = `Becsült bruttó bér: ${ft(cfg.wageFullMin*(fullTimeCheck.checked?1:0.55))}–${ft(cfg.wageFullMax*(fullTimeCheck.checked?1:0.55))}/hó (+13% szocho).`;
+  }
+  roleSelect.addEventListener("change", refresh);
+  fullTimeCheck.addEventListener("change", refresh);
+  refresh();
+
+  document.getElementById("btn-confirm-hire").addEventListener("click", ()=>{
+    const role = roleSelect.value;
+    const fullTime = fullTimeCheck.checked || (role==="marketing"||role==="designer"||role==="country_manager");
+    const market = role==="country_manager" ? (marketSelect.value||null) : null;
+    if(role==="country_manager" && !market){ return; }
+    hireEmployee(role, fullTime, market);
+    document.getElementById("hire-modal").hidden = true;
+    renderTeamPanel();
+    renderAll();
+  });
+  document.getElementById("hire-modal").hidden = false;
+}
+document.getElementById("btn-close-hire-modal").addEventListener("click", ()=>{ document.getElementById("hire-modal").hidden = true; });
+
+// ============================= HÓNAP LEZÁRÁSA =============================
+
 document.getElementById("btn-close-month").addEventListener("click", ()=>{
+  const marketPriceInputs = document.querySelectorAll(".mkt-price");
+  const marketMarketingInputs = document.querySelectorAll(".mkt-marketing");
+  let totalMarketingRequested = 0;
+  marketPriceInputs.forEach(inp=>{ state.markets[inp.dataset.market].price = Number(inp.value)||0; });
+  marketMarketingInputs.forEach(inp=>{ const v = Math.max(0, Number(inp.value)||0); state.markets[inp.dataset.market].marketing = v; totalMarketingRequested += v; });
+
+  if(totalMarketingRequested > 0 && totalMarketingRequested > state.cash){
+    alert("Nincs elég készpénzed az összes piacra megadott marketing büdzsé kifizetésére.");
+    return;
+  }
+
+  let expansionCostThisMonth = 0;
+  if(inSupplier.value !== state.selectedSupplierId){
+    if(state.cash < CONFIG.supplierSwitch.cost){
+      alert("Nincs elég készpénzed a gyártóváltás díjára.");
+      return;
+    }
+    state.cash -= CONFIG.supplierSwitch.cost;
+    expansionCostThisMonth += CONFIG.supplierSwitch.cost;
+    state.selectedSupplierId = inSupplier.value;
+    state.supplierTransitionMonthsLeft = CONFIG.supplierSwitch.transitionMonths;
+  }
+  if(state.pendingExpansionCost){ expansionCostThisMonth += state.pendingExpansionCost; state.pendingExpansionCost = 0; }
+
   const decision = {
-    price: Number(inPrice.value)||0,
     qualityId: inQuality.value,
     packagingId: inPackaging.value,
-    marketing: Number(inMarketing.value)||0,
     position: Number(inPosition.value),
     distribution: inDistribution.value,
     orderQty: Math.max(0, Math.round(Number(inOrder.value)||0)),
+    qaThisOrder: inQa.checked,
+    expansionCostThisMonth,
   };
   state.selectedQualityId = decision.qualityId;
   state.selectedPackagingId = decision.packagingId;
-
-  if(decision.marketing > 0 && decision.marketing > state.cash){
-    alert("Nincs elég készpénzed a megadott marketing büdzsére.");
-    return;
-  }
 
   runMonth(decision);
   renderFeedback();
   state.month++;
 
-  if(state.bankrupt){
-    showEndScreen(true);
-    return;
-  }
-  if(state.month > CONFIG.totalMonths){
-    showEndScreen(false);
-    return;
-  }
+  if(state.bankrupt){ showEndScreen(true); return; }
+  if(state.month > state.gameLength){ showEndScreen(false); return; }
+
+  inQa.checked = false;
   renderOrderHint();
+  renderSupplierHint();
   renderExpansionControls();
+  updateWorldMapStyles();
+  if(selectedMarketKey) selectMarket(selectedMarketKey);
   renderAll();
 });
 
@@ -1109,69 +1537,57 @@ function openCostBreakdownModal(preferredMonth){
   }
   pickerWrap.hidden = false;
   select.innerHTML = state.monthlyRecords.map(r=>`<option value="${r.month}">${r.month}. hónap</option>`).join("");
-  const month = preferredMonth && state.monthlyRecords.some(r=>r.month===preferredMonth)
-    ? preferredMonth
-    : state.monthlyRecords[state.monthlyRecords.length-1].month;
+  const month = preferredMonth && state.monthlyRecords.some(r=>r.month===preferredMonth) ? preferredMonth : state.monthlyRecords[state.monthlyRecords.length-1].month;
   select.value = String(month);
   const rec = state.monthlyRecords.find(r=>r.month===month);
   renderCostBreakdownModal(rec.monthCosts, rec.month);
   document.getElementById("cost-modal").hidden = false;
 }
 document.getElementById("modal-month-select").addEventListener("change", (e)=>{
-  const month = Number(e.target.value);
-  const rec = state.monthlyRecords.find(r=>r.month===month);
+  const rec = state.monthlyRecords.find(r=>r.month===Number(e.target.value));
   if(rec) renderCostBreakdownModal(rec.monthCosts, rec.month);
 });
 document.getElementById("btn-cost-breakdown").addEventListener("click", ()=> openCostBreakdownModal());
-document.getElementById("btn-close-modal").addEventListener("click", ()=>{
-  document.getElementById("cost-modal").hidden = true;
-});
+document.getElementById("btn-close-modal").addEventListener("click", ()=>{ document.getElementById("cost-modal").hidden = true; });
 
 // ============================= UI: RENDER =============================
 
 function renderAll(){
   renderHeader();
   renderPositionMap();
+  renderTeamPanel();
   updateCharts();
 }
 
 function renderHeader(){
   const el = document.getElementById("header-stats");
   const monthLabel = document.getElementById("month-label");
-  monthLabel.textContent = `${Math.min(state.month,CONFIG.totalMonths)}. / ${CONFIG.totalMonths}. hónap`;
+  const shownMonth = Math.min(state.month, state.gameLength);
+  monthLabel.textContent = `${shownMonth}. / ${state.gameLength}. hónap`;
   const cashClass = state.cash>=0 ? "pos":"neg";
   el.innerHTML = `
-    <div class="stat"><div class="k">Hónap</div><div class="v">${Math.min(state.month,CONFIG.totalMonths)} / ${CONFIG.totalMonths}</div></div>
+    <div class="stat"><div class="k">Hónap</div><div class="v">${shownMonth} / ${state.gameLength}</div></div>
     <div class="stat"><div class="k">Pénzkészlet</div><div class="v ${cashClass}">${ft(state.cash)}</div></div>
     <div class="stat"><div class="k">Kumulált profit</div><div class="v ${state.cumulativeProfit>=0?'pos':'neg'}">${ftSigned(state.cumulativeProfit)}</div></div>
-    <div class="stat"><div class="k">Márkaismertség</div><div class="v">${Math.round(state.awareness)} / 100</div>
-      <div class="awareness-bar"><div style="width:${state.awareness}%"></div></div></div>
     <div class="stat"><div class="k">Vállalkozási forma</div><div class="v" style="font-size:13px">${state.bizForm==="kft"?"Kft.":"EV, átalányadó"}</div></div>
-    <div class="stat"><div class="k">Foglalkoztatás</div><div class="v" style="font-size:13px">${state.jobStatus==="fulltime"?"Főállású":"Mellékállású"}</div></div>
+    <div class="stat"><div class="k">Csapatlétszám</div><div class="v" style="font-size:15px">${state.employees.length} fő</div></div>
+    <div class="stat"><div class="k">Aktív piacok</div><div class="v" style="font-size:15px">${activeMarketKeys().length}</div></div>
     <div class="stat"><div class="k">Készlet</div><div class="v" style="font-size:15px">${state.inventory} db</div></div>
-    <div class="stat"><div class="k">Szezon</div><div class="v" style="font-size:12.5px">${seasonLabel(Math.min(state.month,CONFIG.totalMonths))}</div></div>
+    <div class="stat"><div class="k">Szezon</div><div class="v" style="font-size:12px">${seasonLabel(shownMonth)}</div></div>
   `;
 }
 
 function renderPositionMap(){
   const map = document.getElementById("posmap");
   map.innerHTML = "";
-  const axis = document.createElement("div");
-  axis.className = "pm-axis";
-  map.appendChild(axis);
+  const axis = document.createElement("div"); axis.className = "pm-axis"; map.appendChild(axis);
   [0,25,50,75,100].forEach(v=>{
-    const t = document.createElement("div");
-    t.className = "pm-tick";
+    const t = document.createElement("div"); t.className = "pm-tick";
     t.style.left = `calc(12px + (100% - 24px) * ${v/100})`;
-    t.textContent = v;
-    map.appendChild(t);
+    t.textContent = v; map.appendChild(t);
   });
-  const zoneLeft = document.createElement("div");
-  zoneLeft.className = "zone-label"; zoneLeft.style.left="12px"; zoneLeft.textContent="tömegpiaci";
-  map.appendChild(zoneLeft);
-  const zoneRight = document.createElement("div");
-  zoneRight.className = "zone-label"; zoneRight.style.right="12px"; zoneRight.textContent="luxus";
-  map.appendChild(zoneRight);
+  const zoneLeft = document.createElement("div"); zoneLeft.className="zone-label"; zoneLeft.style.left="12px"; zoneLeft.textContent="tömegpiaci"; map.appendChild(zoneLeft);
+  const zoneRight = document.createElement("div"); zoneRight.className="zone-label"; zoneRight.style.right="12px"; zoneRight.textContent="luxus"; map.appendChild(zoneRight);
 
   const makeMarker = (position, label, color, isPlayer)=>{
     const m = document.createElement("div");
@@ -1181,11 +1597,9 @@ function renderPositionMap(){
     m.innerHTML = `<div class="pm-dot"${dotStyle}></div><div class="pm-label">${label}</div>`;
     map.appendChild(m);
   };
-  for(const c of state.competitors){
-    makeMarker(c.position, c.name, c.color, false);
-  }
+  for(const c of state.competitors) makeMarker(c.position, c.name, c.color, false);
   const playerPos = Number(inPosition ? inPosition.value : state.position);
-  makeMarker(playerPos, "Te", null, true); // a "Te" pötty színét a CSS --player tokenje adja (téma-érzékeny)
+  makeMarker(playerPos, "Te", null, true);
 }
 
 function renderFeedback(){
@@ -1195,7 +1609,6 @@ function renderFeedback(){
     scroll.innerHTML = '<p class="muted small">A hónap lezárása után itt jelennek meg az események, legfelül a legutóbbi hónappal.</p>';
     return;
   }
-  // legutóbbi hónap felül, nyitva; a korábbiak összecsukva, de bármikor visszanézhetők
   const records = [...state.monthlyRecords].reverse();
   for(const rec of records){
     const details = document.createElement("details");
@@ -1221,7 +1634,6 @@ function renderFeedback(){
     scroll.appendChild(details);
   }
 }
-
 document.getElementById("feedback-scroll").addEventListener("click", (e)=>{
   const link = e.target.closest(".open-cost-breakdown");
   if(!link) return;
@@ -1231,26 +1643,38 @@ document.getElementById("feedback-scroll").addEventListener("click", (e)=>{
 
 function renderCostBreakdownModal(mc, month){
   const rows = [
-    ["Bevétel (bruttó)", mc.revenueGross],
-    ["Eladott darabszám", mc.unitsSold, true],
+    ["Bevétel (bruttó, összes piac)", mc.revenueGross],
+    ["Eladott darabszám (összes piac)", mc.unitsSold, true],
     ["COGS (eladott áru beszerzési értéke)", -mc.cogs],
     ["Csomagolás", -mc.packaging],
-    ["Marketing", -mc.marketing],
+    ["Marketing (összes piac)", -mc.marketing],
     ["Fizetési szolgáltató jutaléka", -mc.paymentFees],
     ["Futár / kiszállítás", -mc.courier],
-    ["Fix működési költségek (könyvelő, számlázó, webshop, bank, raktár/segítség)", -mc.fixed],
+    ["Fix működési költségek (könyvelő, számlázó, webshop, bank, raktár)", -mc.fixed],
+    ["Csapat bérköltsége (bruttó + szocho)", -mc.teamCost],
+    ["Piaci fenntartási többletköltség (export piacok)", -mc.marketMaintenance],
+    ["Webshop karbantartás", -mc.websiteMaintenance],
     ["Kötelező TB+Szocho járulék", -mc.mandatoryContribution],
     ["Vevői visszaküldés vesztesége", -mc.returnsLoss],
     ["Garanciális csere költsége", -mc.warrantyLoss],
     ["Vámteher (megérkezett szállítmány)", -mc.customsDuty],
     ["Gyártói végösszeg kifizetés (esedékes szállítmány)", -mc.supplierRemainder],
     ["SZJA (átalányadó jövedelemhányad után)", -mc.incomeTaxPayable],
-    ["ÁFA nettó befizetés (negyedév végén)", -mc.vatPayable],
+    ["ÁFA nettó befizetés (negyedév végén, minden piac összesítve)", -mc.vatPayable],
     ["HIPA (negyedév végén)", -mc.hipaPayable],
     ["Társasági adó / TAO (negyedév végén, Kft.)", -mc.corpTaxPayable],
-    ["Bővülési egyszeri költség", -mc.expansionCost],
+    ["Egyszeri beruházás / jogi / bővülési költség", -mc.expansionCost],
   ];
   let html = `<p class="small muted">${month}. hónap</p>`;
+  if(mc.marketBreakdown && Object.keys(mc.marketBreakdown).length>1){
+    html += `<table class="costs"><thead><tr><th>Piac</th><th class="num">Eladott db</th><th class="num">Bevétel</th></tr></thead><tbody>`;
+    for(const key of Object.keys(mc.marketBreakdown)){
+      const mb = mc.marketBreakdown[key];
+      const name = key==="hu" ? "Magyarország" : CONFIG.markets[key].name;
+      html += `<tr><td>${name}</td><td class="num">${mb.unitsSold} db</td><td class="num">${ft(mb.revenueGross)}</td></tr>`;
+    }
+    html += `</tbody></table><div style="height:10px;"></div>`;
+  }
   html += `<table class="costs"><thead><tr><th>Tétel</th><th class="num">Összeg</th></tr></thead><tbody>`;
   for(const [label, val, isCount] of rows){
     if(val===0 || val===undefined) continue;
@@ -1264,8 +1688,9 @@ function renderCostBreakdownModal(mc, month){
 
 // ============================= GRAFIKONOK (Chart.js) =============================
 
-let chartCash, chartProfit, chartAwareness;
+let chartCash, chartProfit, chartAwarenessMarkets, chartAwarenessCompetitors, chartTeam;
 let chartsAvailable = true;
+const MARKET_COLORS = { hu: "#2f5fd6", v4: "#e0a52e", de: "#7b3fe4", uk: "#0f9b8e", us: "#e05252", ro: "#3fae5c" };
 
 function initCharts(){
   if(typeof Chart === "undefined"){
@@ -1288,30 +1713,43 @@ function initCharts(){
       y:{ ticks:{ color:mutedColor, font:{family:"IBM Plex Mono", size:10}, callback:v=>Number(v).toLocaleString("hu-HU") }, grid:{color:gridColor} },
     },
   };
-  const datasetsFor = (metric)=> [
-    { label:"Te", data:[...state.history[metric]], borderColor: playerColor, backgroundColor:playerColor, borderWidth:2.5, pointRadius:0, tension:.25 },
-    ...state.competitors.map(c=>({ label:c.name, data:[...c.history[metric]], borderColor:c.color, backgroundColor:c.color, borderWidth:1.5, pointRadius:0, tension:.25, borderDash:[4,3] })),
-  ];
+
   chartCash = new Chart(document.getElementById("chart-cash"), {
-    type:"line", data:{ labels:[0], datasets:datasetsFor("cash") }, options: commonOpts,
+    type:"line", data:{ labels:[0], datasets:[{ label:"Pénzkészlet", data:[...state.history.cash], borderColor:playerColor, backgroundColor:playerColor, borderWidth:2.5, pointRadius:0, tension:.25 }] }, options: commonOpts,
   });
   chartProfit = new Chart(document.getElementById("chart-profit"), {
-    type:"line", data:{ labels:[0], datasets:datasetsFor("profit") }, options: commonOpts,
+    type:"line", data:{ labels:[0], datasets:[{ label:"Kumulált profit", data:[...state.history.profit], borderColor:playerColor, backgroundColor:playerColor, borderWidth:2.5, pointRadius:0, tension:.25 }] }, options: commonOpts,
   });
-  chartAwareness = new Chart(document.getElementById("chart-awareness"), {
-    type:"line", data:{ labels:[0], datasets:datasetsFor("awareness") }, options: {...commonOpts, scales:{...commonOpts.scales, y:{min:0,max:100}}},
+  const marketKeys = Object.keys(state.history.marketAwareness);
+  chartAwarenessMarkets = new Chart(document.getElementById("chart-awareness-markets"), {
+    type:"line", data:{ labels:[0], datasets: marketKeys.map(k=>({ label: k==="hu"?"Magyarország":CONFIG.markets[k].name, data:[...state.history.marketAwareness[k]], borderColor:MARKET_COLORS[k], backgroundColor:MARKET_COLORS[k], borderWidth:2, pointRadius:0, tension:.25, spanGaps:false })) },
+    options: {...commonOpts, scales:{...commonOpts.scales, y:{...commonOpts.scales.y, min:0,max:100}}},
+  });
+  chartAwarenessCompetitors = new Chart(document.getElementById("chart-awareness-competitors"), {
+    type:"line", data:{ labels:[0], datasets:[
+      { label:"Te (hazai piac)", data:[...state.history.marketAwareness.hu], borderColor:playerColor, backgroundColor:playerColor, borderWidth:2.5, pointRadius:0, tension:.25 },
+      ...state.competitors.map(c=>({ label:c.name, data:[...c.history.awareness], borderColor:c.color, backgroundColor:c.color, borderWidth:1.5, pointRadius:0, tension:.25, borderDash:[4,3] })),
+    ]}, options: {...commonOpts, scales:{...commonOpts.scales, y:{...commonOpts.scales.y, min:0,max:100}}},
+  });
+  chartTeam = new Chart(document.getElementById("chart-team"), {
+    type:"line", data:{ labels:[0], datasets:[{ label:"Csapatlétszám (fő)", data:[...state.history.teamSize], borderColor:playerColor, backgroundColor:playerColor, borderWidth:2.5, pointRadius:0, tension:.15, stepped:true }] }, options: commonOpts,
   });
 }
 
 function updateCharts(){
   if(!chartsAvailable) return;
   const labels = state.history.months;
-  for(const [chart, metric] of [[chartCash,"cash"],[chartProfit,"profit"],[chartAwareness,"awareness"]]){
-    chart.data.labels = labels;
-    chart.data.datasets[0].data = state.history[metric];
-    state.competitors.forEach((c,i)=>{ chart.data.datasets[i+1].data = c.history[metric]; });
-    chart.update();
-  }
+  chartCash.data.labels = labels; chartCash.data.datasets[0].data = state.history.cash; chartCash.update();
+  chartProfit.data.labels = labels; chartProfit.data.datasets[0].data = state.history.profit; chartProfit.update();
+  chartTeam.data.labels = labels; chartTeam.data.datasets[0].data = state.history.teamSize; chartTeam.update();
+  const marketKeys = Object.keys(state.history.marketAwareness);
+  chartAwarenessMarkets.data.labels = labels;
+  marketKeys.forEach((k,i)=>{ chartAwarenessMarkets.data.datasets[i].data = state.history.marketAwareness[k]; });
+  chartAwarenessMarkets.update();
+  chartAwarenessCompetitors.data.labels = labels;
+  chartAwarenessCompetitors.data.datasets[0].data = state.history.marketAwareness.hu;
+  state.competitors.forEach((c,i)=>{ chartAwarenessCompetitors.data.datasets[i+1].data = c.history.awareness; });
+  chartAwarenessCompetitors.update();
 }
 
 // ============================= JÁTÉK VÉGE =============================
@@ -1320,53 +1758,42 @@ function showEndScreen(bankrupt){
   gameScreen.hidden = true;
   endScreen.hidden = false;
   const players = [
-    { name:"Te", profit: state.cumulativeProfit, awareness: state.awareness, isPlayer:true },
+    { name:"Te", profit: state.cumulativeProfit, awareness: state.markets.hu.awareness, isPlayer:true },
     ...state.competitors.map(c=>({ name:c.name, profit:c.cumulativeProfit, awareness:c.awareness, isPlayer:false })),
   ].sort((a,b)=>b.profit-a.profit);
-
   const playerRank = players.findIndex(p=>p.isPlayer)+1;
+  const marketsReached = activeMarketKeys().length;
 
   let evalText = "";
   if(bankrupt){
-    evalText = `A vállalkozásod a(z) ${state.bankruptMonth}. hónapban csődbe ment: a pénzkészlet tartósan a kritikus szint alá süllyedt, és nem maradt fedezet a kötelezettségekre. `;
+    evalText = `A vállalkozásod a(z) ${state.bankruptMonth}. hónapban csődbe ment: a pénzkészlet tartósan a kritikus szint alá süllyedt. `;
   } else {
-    evalText = `Túlélted mind a ${CONFIG.totalMonths} hónapot. `;
+    evalText = `Túlélted mind a ${state.gameLength} hónapot. `;
   }
-  if(state.awareness > 60){
-    evalText += "Erős márkaismertséget építettél fel, ami hosszú távon stabil keresletet biztosít. ";
-  } else if(state.awareness < 25){
-    evalText += "A márkaismertséged alacsony maradt — érdemes lett volna többet költeni marketingre vagy konzisztensebben pozicionálni magad. ";
-  }
-  if(playerRank===1){
-    evalText += "A kumulált profit alapján te vezeted a mezőnyt mind az 5 márka között!";
-  } else {
-    evalText += `A kumulált profit alapján a(z) ${playerRank}. helyen végeztél az 5 márka közül.`;
-  }
+  if(marketsReached >= 4){ evalText += "Agresszív nemzetközi terjeszkedési stratégiát követtél — sok piacon vagy jelen. "; }
+  else if(marketsReached >= 2){ evalText += "Óvatos, fokozatos nemzetközi terjeszkedést valósítottál meg. "; }
+  else { evalText += "A hazai piacra fókuszáltál, nem (vagy alig) terjeszkedtél nemzetközileg. "; }
+  if(state.markets.hu.awareness > 60){ evalText += "Erős hazai márkaismertséget építettél. "; }
+  else if(state.markets.hu.awareness < 25){ evalText += "A hazai márkaismertséged alacsony maradt. "; }
+  if(state.employees.length >= 4){ evalText += "Jelentős csapatot építettél fel a cég köré. "; }
+  evalText += playerRank===1 ? "A kumulált profit alapján te vezeted a mezőnyt mind az 5 márka között!" : `A kumulált profit alapján a(z) ${playerRank}. helyen végeztél az 5 márka közül.`;
 
-  const rows = players.map(p=>`
-    <tr class="${p.isPlayer?'me':''}">
-      <td>${p.name}</td>
-      <td class="num">${ftSigned(p.profit)}</td>
-      <td class="num">${Math.round(p.awareness)}</td>
-    </tr>`).join("");
+  const rows = players.map(p=>`<tr class="${p.isPlayer?'me':''}"><td>${p.name}</td><td class="num">${ftSigned(p.profit)}</td><td class="num">${Math.round(p.awareness)}</td></tr>`).join("");
 
   document.getElementById("end-content").innerHTML = `
-    <h1>${bankrupt ? "Csőd — a szimuláció véget ért" : "24 hónap letelt — a szimuláció véget ért"}</h1>
+    <h1>${bankrupt ? "Csőd — a szimuláció véget ért" : `${state.gameLength} hónap letelt — a szimuláció véget ért`}</h1>
     <div class="stat-grid" style="margin-bottom:16px;">
       <div class="stat"><div class="k">Végső kumulált profit</div><div class="v ${state.cumulativeProfit>=0?'pos':'neg'}">${ftSigned(state.cumulativeProfit)}</div></div>
-      <div class="stat"><div class="k">Végső márkaismertség</div><div class="v">${Math.round(state.awareness)} / 100</div></div>
+      <div class="stat"><div class="k">Elért piacok</div><div class="v">${marketsReached}</div></div>
+      <div class="stat"><div class="k">Csapatlétszám</div><div class="v">${state.employees.length} fő</div></div>
+      <div class="stat"><div class="k">Hazai márkaismertség</div><div class="v">${Math.round(state.markets.hu.awareness)} / 100</div></div>
       <div class="stat"><div class="k">Helyezés</div><div class="v">${playerRank}. / 5</div></div>
       <div class="stat"><div class="k">Állapot</div><div class="v ${bankrupt?'neg':'pos'}">${bankrupt?"Csődbe ment":"Túlélte"}</div></div>
     </div>
     <h2>Rangsor kumulált profit szerint</h2>
-    <table class="rank-table">
-      <thead><tr><th>Márka</th><th class="num">Kumulált profit</th><th class="num">Márkaismertség</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
+    <table class="rank-table"><thead><tr><th>Márka</th><th class="num">Kumulált profit</th><th class="num">Márkaismertség</th></tr></thead><tbody>${rows}</tbody></table>
     <p style="margin-top:16px;">${evalText}</p>
-    <div class="btn-row" style="margin-top:12px;">
-      <button class="btn" onclick="location.reload()">Új játék indítása</button>
-    </div>
+    <div class="btn-row" style="margin-top:12px;"><button class="btn" onclick="location.reload()">Új játék indítása</button></div>
   `;
 }
 
