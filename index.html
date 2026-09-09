@@ -412,6 +412,7 @@ const CONFIG = {
     trademarkEU: { min: 340000, max: 400000 },
     designProtection: { min: 50000, max: 150000 },
     qaInspection: { min: 150000, max: 400000, defectCap: 0.03 },
+    securityDoor: { cost: 280000, theftRiskReduction: 0.9 },
   },
 
   employees: {
@@ -463,21 +464,28 @@ const CONFIG = {
     warrantyRateMin: 0.005, warrantyRateMax: 0.02,
     copycatAnnualChance: { none: 0.06, trademarkHU: 0.025, full: 0.005 },
     copycatAwarenessLossMin: 8, copycatAwarenessLossMax: 16,
+    theftMonthlyChance: 0.025, theftLossMin: 0.05, theftLossMax: 0.20,
   },
 
   seasonality: { multipliers: [0.6, 0.55, 0.85, 1.0, 1.5, 1.7, 1.8, 1.5, 1.0, 0.85, 0.6, 0.55] },
 
   market: {
-    huTotalMonthlyPotentialCustomers: 1100,
+    huTotalMonthlyPotentialCustomers: 1350,
     overlapSigma: 16, minDensity: 0.4, maxDensity: 1.3,
     priceFactorSensitivity: 0.8, minIdealPrice: 7000, maxIdealPrice: 130000,
     marketingRefSpend: 220000,
-    marketingMaxBoost: 1.1,
+    marketingMaxBoost: 1.3,
     awarenessDecayNoMarketing: 2.5,
     awarenessBigJumpThreshold: 15,
     awarenessGrowthK: 6,
     backgroundNoise: { centerPos: 35, width: 25, maxPenalty: 0.18 },
     exportGenericCompetitionDamp: 0.55,
+    // "Törzsvásárlói kör / szájreklám" bónusz: minél több darabot adtál el összesen egy piacon,
+    // annál nagyobb a visszatérő vásárlók és az ismertség szájhagyomány útján terjedő hatása —
+    // ez teszi lehetővé, hogy egy ÉRETT, sok éve futó, jól menedzselt vállalkozás (pl. nagyobb
+    // csapattal, több raktárral) idővel jóval nagyobb forgalmat érjen el, mint egy induló cég,
+    // anélkül hogy az első pár hónap nehézségi szintjét megváltoztatná (a bónusz kezdetben ~1.0).
+    loyaltyBonus: { unitsPerStep: 9000, maxBonus: 4.6 },
   },
 
   distribution: {
@@ -605,6 +613,8 @@ function initState(bizForm, jobStatus, gameLength){
     rentedWarehouses: [], // { monthlyRent } — minden bérelt egység a bérléskori áron marad rögzítve
     ownedWarehouses: [], // { maintenance } — minden megvásárolt egység a vásárláskori fenntartási díjjal
     hasInsurance: false,
+    hasSecurityDoor: false,
+    marketCumulativeUnits: { hu: 0, v4: 0, de: 0, uk: 0, us: 0, ro: 0 },
     position: 40,
     prevPosition: 40,
     fixed: { accountant, invoicing, webshop: webshopHosting, bankFee },
@@ -648,11 +658,16 @@ function warehouseStaffCapacity(){
 }
 function marketingEffMultiplier(){
   const n = employeesByRole("marketing").length;
-  return clamp(1 + n*CONFIG.employees.roles.marketing.marketingEffMultiplier, 1, 2.2);
+  return clamp(1 + n*CONFIG.employees.roles.marketing.marketingEffMultiplier, 1, 2.6);
 }
 function qualityPerceptionMultiplier(){
   const n = employeesByRole("designer").length;
-  return clamp(1 + n*CONFIG.employees.roles.designer.qualityPerceptionBonus, 1, 1.4);
+  return clamp(1 + n*CONFIG.employees.roles.designer.qualityPerceptionBonus, 1, 1.6);
+}
+function loyaltyBonus(marketKey){
+  const cfg = CONFIG.market.loyaltyBonus;
+  const units = state.marketCumulativeUnits[marketKey] || 0;
+  return clamp(1 + units/cfg.unitsPerStep, 1, cfg.maxBonus);
 }
 function supportLossMultiplier(){
   const n = employeesByRole("support").length;
@@ -717,7 +732,7 @@ function computeHuAllocations(month, decision, opts){
     const pf = priceFactorGeneric(p.price, idealPriceForPosition(p.position));
     const mb = marketingEffect(p.marketingSpend, CONFIG.market.marketingRefSpend) * CONFIG.market.marketingMaxBoost;
     let a = Math.max(0.01, p.awareness/100) * pf * (1+mb);
-    if(p.isPlayer) a *= qEff;
+    if(p.isPlayer) a *= qEff * loyaltyBonus("hu");
     attractiveness[p.key] = a;
   }
 
@@ -774,7 +789,7 @@ function computeExportDemand(marketKey, decision, opts){
   const ref = CONFIG.market.marketingRefSpend * cfg.marketingCostMultiplier;
   const mb = marketingEffect(marketing*mEff, ref) * CONFIG.market.marketingMaxBoost;
   const baseline = CONFIG.market.huTotalMonthlyPotentialCustomers * cfg.sizeFactor;
-  const attractiveness = Math.max(0.01, mstate.awareness/100) * pf * (1+mb) * qEff;
+  const attractiveness = Math.max(0.01, mstate.awareness/100) * pf * (1+mb) * qEff * loyaltyBonus(marketKey);
   const distCfg = CONFIG.distribution[decision.distribution];
   let units = baseline * seasonal * attractiveness * CONFIG.market.exportGenericCompetitionDamp * distCfg.reachMultiplier * (opts.deterministic ? 1 : randRange(0.9,1.1));
   return Math.max(0, units);
@@ -934,7 +949,7 @@ function runMonth(decision){
     teamCost: totalTeamCost(),
     marketMaintenance: activeMarketKeys().filter(k=>k!=="hu").reduce((a,k)=>a+CONFIG.markets[k].maintenanceExtra,0),
     mandatoryContribution: 0,
-    returnsLoss:0, warrantyLoss:0,
+    returnsLoss:0, warrantyLoss:0, theftLoss:0,
     customsDuty:0, supplierRemainder:0,
     vatPayable:0, hipaPayable:0, incomeTaxPayable:0, corpTaxPayable:0,
     expansionCost: decision.expansionCostThisMonth || 0,
@@ -991,6 +1006,7 @@ function runMonth(decision){
     marketBreakdown[key] = { revenueGross: revenue, unitsSold: sold, cogs, vatOutput: outputVat, vatRate };
     monthCosts.revenueGross += revenue;
     monthCosts.cogs += cogs;
+    state.marketCumulativeUnits[key] = (state.marketCumulativeUnits[key]||0) + sold;
   }
   if(totalDemand > state.inventory){
     log.push({type:"bad", text:`A teljes kereslet (${totalDemand} db) meghaladta a raktárkészletet (${state.inventory} db) — elmaradt bevétel a készlethiány miatt.`});
@@ -1083,6 +1099,15 @@ function runMonth(decision){
     log.push({type:"bad", text:`Valaki lemásolta / hasonló néven kezdte árulni a termékedet — ez ${Math.round(loss)} pontot ártott a hazai márkaismertségednek.${ipLevel==="none" ? " Védjegybejelentéssel csökkenthető lett volna a kockázat." : ""}`});
   }
 
+  const theftChance = CONFIG.risk.theftMonthlyChance * (state.hasSecurityDoor ? (1-CONFIG.oneTime.securityDoor.theftRiskReduction) : 1);
+  if(state.inventory > 0 && Math.random() < theftChance){
+    const lossRatio = randRange(CONFIG.risk.theftLossMin, CONFIG.risk.theftLossMax);
+    const stolenUnits = Math.round(state.inventory * lossRatio);
+    state.inventory -= stolenUnits;
+    monthCosts.theftLoss = stolenUnits * state.avgUnitCost;
+    log.push({type:"bad", text:`Betörtek a raktárba — ${stolenUnits} db készlet eltűnt (kár: ${ft(monthCosts.theftLoss)}).${state.hasSecurityDoor ? "" : " Biztonsági bejárati ajtóval ez a kockázat nagyrészt elkerülhető lett volna."}`});
+  }
+
   state.cash += monthCosts.revenueGross;
   state.cash -= monthCosts.packaging;
   state.cash -= monthCosts.marketing;
@@ -1099,7 +1124,7 @@ function runMonth(decision){
 
   const monthProfit = monthCosts.revenueGross - monthCosts.cogs - monthCosts.packaging - monthCosts.marketing - monthCosts.paymentFees
     - monthCosts.courier - monthCosts.fixed - monthCosts.teamCost - monthCosts.marketMaintenance - monthCosts.websiteMaintenance
-    - monthCosts.mandatoryContribution - monthCosts.returnsLoss - monthCosts.warrantyLoss - monthCosts.customsDuty
+    - monthCosts.mandatoryContribution - monthCosts.returnsLoss - monthCosts.warrantyLoss - monthCosts.theftLoss - monthCosts.customsDuty
     - incomeTax - vatPaidThisMonth - hipaPaidThisMonth - corpTaxPaidThisMonth - monthCosts.expansionCost;
   state.cumulativeProfit += monthProfit;
   monthCosts.monthProfit = monthProfit;
@@ -1309,6 +1334,13 @@ function renderExpansionControls(){
     add(`<div class="small muted">✓ Termékfelelősség-biztosítás aktív</div>`);
   }
 
+  if(!state.hasSecurityDoor){
+    const can = state.cash >= CONFIG.oneTime.securityDoor.cost;
+    add(`<button class="btn secondary" id="btn-security-door" ${can?"":"disabled"}>Biztonsági bejárati ajtó a raktárhoz (egyszeri ${ft(CONFIG.oneTime.securityDoor.cost)}, ~${Math.round(CONFIG.oneTime.securityDoor.theftRiskReduction*100)}%-kal csökkenti a betörési kockázatot)</button>`);
+  } else {
+    add(`<div class="small muted">✓ Biztonsági bejárati ajtó felszerelve</div>`);
+  }
+
   if(!state.website.tier){
     const canBasic = state.cash >= CONFIG.oneTime.website.basic.cost;
     const canCustom = state.cash >= CONFIG.oneTime.website.custom.cost;
@@ -1350,6 +1382,7 @@ function renderExpansionControls(){
     renderExpansionControls(); renderOrderHint(); renderAll();
   });
   bind("btn-insurance", ()=>{ state.hasInsurance=true; renderExpansionControls(); renderAll(); });
+  bind("btn-security-door", ()=>{ state.cash -= CONFIG.oneTime.securityDoor.cost; state.hasSecurityDoor=true; renderExpansionControls(); renderAll(); });
   bind("btn-website-basic", ()=>{ state.cash -= CONFIG.oneTime.website.basic.cost; state.website.tier="basic"; renderExpansionControls(); renderAll(); });
   bind("btn-website-custom", ()=>{ state.cash -= CONFIG.oneTime.website.custom.cost; state.website.tier="custom"; renderExpansionControls(); renderAll(); });
   bind("btn-trademark-hu", ()=>{ state.cash -= CONFIG.oneTime.trademarkHU; state.ipProtection.trademarkHU=true; renderExpansionControls(); renderAll(); });
@@ -1718,6 +1751,7 @@ function renderCostBreakdownModal(mc, month){
     ["Kötelező TB+Szocho járulék", -mc.mandatoryContribution],
     ["Vevői visszaküldés vesztesége", -mc.returnsLoss],
     ["Garanciális csere költsége", -mc.warrantyLoss],
+    ["Betörés / lopás kára", -mc.theftLoss],
     ["Vámteher (megérkezett szállítmány)", -mc.customsDuty],
     ["Gyártói végösszeg kifizetés (esedékes szállítmány)", -mc.supplierRemainder],
     ["SZJA (átalányadó jövedelemhányad után)", -mc.incomeTaxPayable],
